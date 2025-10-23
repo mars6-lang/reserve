@@ -95,6 +95,24 @@ class orderController extends Controller
         return back()->with('status', 'Order cancelled successfully.');
     }
 
+    /**
+     * Mark an order as received by the buyer
+     */
+    public function markReceived(orders $order)
+    {
+        // Ensure only the buyer can mark their own order as received
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Update order status to "received"
+        $order->update([
+            'status' => 'received'
+        ]);
+
+        return redirect()->back()->with('success', 'Order marked as received.');
+    }
+
 
     /**
      * Display the specified resource.

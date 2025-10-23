@@ -40,6 +40,9 @@
             @yield('content')
         </main>
 
+        {{-- Chat Modal --}}
+        @include('components.chat-modal')
+
         {{-- Modals --}}
         @stack('modals')
 
@@ -102,6 +105,9 @@
 
         {{-- Scripts --}}
         @stack('scripts')
+
+        <!-- Bootstrap JS for modals and components -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </div>
 </body>
 

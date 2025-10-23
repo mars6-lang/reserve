@@ -40,6 +40,66 @@ class ChatController extends Controller
         return view('chatroom.index', compact('contacts', 'contactProducts'));
     }
 
+    /**
+     * Get chats data for modal (API endpoint)
+     */
+    public function getChatsData()
+    {
+        $authId = auth()->id();
+
+        $contacts = Chat::where('sender_id', $authId)
+            ->orWhere('receiver_id', $authId)
+            ->with(['sender', 'receiver', 'product'])
+            ->get()
+            ->map(function ($chat) use ($authId) {
+                return $chat->sender_id == $authId ? $chat->receiver : $chat->sender;
+            })
+            ->unique('id')
+            ->values();
+
+        $contactProducts = [];
+        $contactsData = [];
+
+        foreach ($contacts as $contact) {
+            // Get the latest message with that contact
+            $latestMessage = Chat::where(function ($q) use ($authId, $contact) {
+                $q->where('sender_id', $authId)
+                    ->where('receiver_id', $contact->id);
+            })->orWhere(function ($q) use ($authId, $contact) {
+                $q->where('sender_id', $contact->id)
+                    ->where('receiver_id', $authId);
+            })->latest()->first();
+
+            // Get the latest product message
+            $latestProductMessage = Chat::where('sender_id', $contact->id)
+                ->where('receiver_id', $authId)
+                ->whereNotNull('product_id')
+                ->with('product')
+                ->latest()
+                ->first();
+
+            $contactProducts[$contact->id] = $latestProductMessage?->product;
+
+            $contactsData[] = [
+                'id' => $contact->id,
+                'name' => $contact->name,
+                'profile_photo_url' => $contact->profile_photo_url,
+                'latest_message' => $latestMessage ? $latestMessage->message : '',
+                'latest_message_time' => $latestMessage ? $latestMessage->created_at->diffForHumans() : '',
+                'product' => $latestProductMessage?->product ? [
+                    'id' => $latestProductMessage->product->id,
+                    'title' => $latestProductMessage->product->title,
+                    'image' => $latestProductMessage->product->image
+                ] : null
+            ];
+        }
+
+        return response()->json([
+            'contacts' => $contactsData,
+            'count' => count($contactsData)
+        ]);
+    }
+
     public function show(User $user, Request $request)
     {
         $authId = auth()->id();

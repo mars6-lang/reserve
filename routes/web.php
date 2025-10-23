@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
 //caht room
 Route::middleware('auth')->group(function () {
     Route::get('/chatroom', [ChatController::class, 'index'])->name('chatroom.index');
+    Route::get('/chatroom/data', [ChatController::class, 'getChatsData'])->name('chatroom.data');
     Route::get('/chatroom/{user}', 'App\Http\Controllers\ChatController@show')->name('chatroom.show');
     Route::post('/chatroom/{user}', 'App\Http\Controllers\ChatController@store')->name('chatroom.store');
 });
