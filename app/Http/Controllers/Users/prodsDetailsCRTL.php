@@ -45,8 +45,11 @@ class prodsDetailsCRTL extends Controller
             ->where('user_id', auth()->id())
             ->whereHas('product');
 
+        // If no specific status filter, exclude completed and cancelled
         if ($status) {
             $query->where('status', $status);
+        } else {
+            $query->whereNotIn('status', ['completed', 'cancelled']);
         }
 
         $orders = $query->latest()->get();

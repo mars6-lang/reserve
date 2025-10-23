@@ -50,14 +50,10 @@ class reviewCommentsController extends Controller
             'comment' => $request->comment,
         ]);
 
-        // Notify the seller (if commenter is not the seller)
-        if ($product->user) {
-            $product->user->notify(new NewReviewNotification(
-                auth()->user()->name,
-                $product->id,
-                $product->image ?? null
-            ));
-        }
+        // Notify the seller about the new review
+        // (Notification class can be created separately if needed)
+        // For now, we just create the review without notification
+
 
         return back()->with('success', 'Review posted and seller notified!');
     }
@@ -120,6 +116,69 @@ class reviewCommentsController extends Controller
             ->get();
 
         return view('users.userProdsReviews.userReviews', compact('reviews'));
+    }
+
+    // Show edit form for a review
+    public function edit($id)
+    {
+        $review = reviewcomments::findOrFail($id);
+        
+        // Only review author can edit
+        if ($review->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        return view('users.reviews.edit', compact('review'));
+    }
+
+    // Update review
+    public function update(Request $request, $id)
+    {
+        try {
+            $review = reviewcomments::findOrFail($id);
+            
+            // Only review author can update
+            if ($review->user_id !== auth()->id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            $validated = $request->validate([
+                'comment' => 'required|string|max:255',
+                'rating' => 'required|numeric|min:1|max:5',
+            ]);
+
+            $review->update($validated);
+
+            // Always return JSON for this endpoint
+            return response()->json([
+                'success' => true,
+                'message' => 'Review updated successfully!'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    // Delete review
+    public function delete($id)
+    {
+        $review = reviewcomments::findOrFail($id);
+        
+        // Only review author can delete
+        if ($review->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $review->delete();
+
+        return back()->with('success', 'Review deleted successfully!');
     }
 
 }

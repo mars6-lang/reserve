@@ -65,6 +65,37 @@
     .cart-icon-link:hover {
         text-decoration: underline;
     }
+    /* Notification bell badge */
+    .notification-badge {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.5rem;
+        height: 1.5rem;
+        background-color: #f59e0b;
+        color: white;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0 0.25rem;
+        margin-left: 0.25rem;
+    }
+    .notification-bell-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        cursor: pointer;
+        color: #064e3b;
+        text-decoration: none;
+        position: relative;
+    }
+    .notification-bell-link:hover {
+        text-decoration: underline;
+    }
+    .notification-bell-link svg {
+        stroke: #064e3b;
+    }
 </style>
 
 <header class="site-header">
@@ -78,7 +109,9 @@
                     {{-- Reservations Cart Icon --}}
                     @if (!$user->is_seller)
                         @php
-                            $reservationCount = \App\Models\Users\orders::where('user_id', $user->id)->count();
+                            $reservationCount = \App\Models\Users\orders::where('user_id', $user->id)
+                                ->whereNotIn('status', ['completed', 'cancelled'])
+                                ->count();
                         @endphp
                         <a href="{{ route('users.reservations.track') }}" class="cart-icon-link" title="View all reservations">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" style="width: 1.25rem; height: 1.25rem;">
@@ -92,6 +125,17 @@
                     @endif
                     
                     @if ($user->is_seller)
+                        {{-- Seller Notifications Bell --}}
+                        @php
+                            $allNotifications = auth()->user()->notifications;
+                            $unreadNotificationsCount = auth()->user()->unreadNotifications->count();
+                        @endphp
+                        <a href="{{ route('notifications.index') }}" class="notification-bell-link" title="View notifications">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span class="notification-badge">{{ $unreadNotificationsCount }}</span>
+                        </a>
                         <a href="{{ route('seller.dashboard.index') }}" style="color: #064e3b;">Seller Dashboard</a>
                     @else
                         <a href="{{ route('users.registeraccount') }}" style="color: #064e3b;">Register as Seller</a>
@@ -120,7 +164,9 @@
                 <!-- Desktop nav links -->
                 <div style="display: none; gap: 1.5rem; align-items: center; font-size: 1rem; font-weight: 500;" class="desktop-nav">
                     <a href="{{ route('home') }}" style="color: #064e3b; padding: 0.5rem 0.75rem; border-radius: 0.375rem;">Home</a>
-                    <a href="{{ route('users.Market.index') }}" style="color: #064e3b; padding: 0.5rem 0.75rem; border-radius: 0.375rem;">Market</a>
+                    @if (!auth()->check() || !auth()->user()->is_seller)
+                        <a href="{{ route('users.Market.index') }}" style="color: #064e3b; padding: 0.5rem 0.75rem; border-radius: 0.375rem;">Market</a>
+                    @endif
                 </div>
 
                 <!-- Mobile hamburger -->

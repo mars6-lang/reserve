@@ -441,28 +441,35 @@
         <h2 class="carousel-title">Featured Seafood Collections</h2>
         
         <div class="carousel">
-            <div class="carousel-slide active">
-                <img src="{{ asset('images/pexels-mali-229789.jpg') }}" alt="Fresh Seafood">
-            </div>
-            <div class="carousel-slide">
-                <img src="{{ asset('images/pexels-kindelmedia-8351639.jpg') }}" alt="Fish Market">
-            </div>
-            <div class="carousel-slide">
-                <img src="{{ asset('images/pexels-pixabay-61153.jpg') }}" alt="Seafood">
-            </div>
-            <div class="carousel-slide">
-                <img src="https://images.unsplash.com/photo-1599599810694-cd308a4f2d4b?w=1200&q=80&auto=format&fit=crop"
-                    alt="Catch of the Day">
-            </div>
+            @forelse ($products as $product)
+                <div class="carousel-slide @if($loop->first)active @endif">
+                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}" title="{{ $product->title }}">
+                </div>
+            @empty
+                {{-- Fallback to static images if no products available --}}
+                <div class="carousel-slide active">
+                    <img src="{{ asset('images/pexels-mali-229789.jpg') }}" alt="Fresh Seafood">
+                </div>
+                <div class="carousel-slide">
+                    <img src="{{ asset('images/pexels-kindelmedia-8351639.jpg') }}" alt="Fish Market">
+                </div>
+                <div class="carousel-slide">
+                    <img src="{{ asset('images/pexels-pixabay-61153.jpg') }}" alt="Seafood">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1599599810694-cd308a4f2d4b?w=1200&q=80&auto=format&fit=crop"
+                        alt="Catch of the Day">
+                </div>
+            @endforelse
         </div>
 
         <div class="carousel-controls">
             <button class="carousel-btn" onclick="prevSlide()">❮</button>
             <div class="carousel-indicators">
-                <button class="indicator active" onclick="currentSlide(0)"></button>
-                <button class="indicator" onclick="currentSlide(1)"></button>
-                <button class="indicator" onclick="currentSlide(2)"></button>
-                <button class="indicator" onclick="currentSlide(3)"></button>
+                @php $productCount = count($products) > 0 ? count($products) : 4; @endphp
+                @for ($i = 0; $i < $productCount; $i++)
+                    <button class="indicator @if($i === 0)active @endif" onclick="currentSlide({{ $i }})"></button>
+                @endfor
             </div>
             <button class="carousel-btn" onclick="nextSlide()">❯</button>
         </div>
@@ -489,15 +496,22 @@
             </div>
 
             <div class="why-gallery">
-                <div class="gallery-item">
-                    <img src="{{ asset('images/pexels-mali-229789.jpg') }}" alt="Seafood 1">
-                </div>
-                <div class="gallery-item">
-                    <img src="{{ asset('images/pexels-kindelmedia-8351639.jpg') }}" alt="Seafood 2">
-                </div>
-                <div class="gallery-item">
-                    <img src="{{ asset('images/pexels-pixabay-61153.jpg') }}" alt="Seafood 3">
-                </div>
+                @forelse ($products->take(3) as $product)
+                    <div class="gallery-item">
+                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}" title="{{ $product->title }}">
+                    </div>
+                @empty
+                    {{-- Fallback to static images --}}
+                    <div class="gallery-item">
+                        <img src="{{ asset('images/pexels-mali-229789.jpg') }}" alt="Seafood 1">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="{{ asset('images/pexels-kindelmedia-8351639.jpg') }}" alt="Seafood 2">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="{{ asset('images/pexels-pixabay-61153.jpg') }}" alt="Seafood 3">
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>

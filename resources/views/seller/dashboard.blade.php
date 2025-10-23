@@ -59,13 +59,33 @@
 
         <div class="container py-4">
 
+            <!-- 🔔 Notifications Alert Banner -->
+            @php
+                $unreadNotifications = auth()->user()->unreadNotifications;
+                $unreadCount = $unreadNotifications->count();
+            @endphp
+            @if ($unreadCount > 0)
+                <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert" style="background-color: #fef3c7; border: 1px solid #fcd34d; color: #78350f;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20" style="width: 1.5rem; height: 1.5rem; flex-shrink: 0;">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5.951-1.429 5.951 1.429a1 1 0 001.169-1.409l-7-14z" />
+                        </svg>
+                        <div>
+                            <strong>{{ $unreadCount }} New Notification{{ $unreadCount !== 1 ? 's' : '' }}!</strong>
+                            <p class="mb-0 text-sm">You have unread system notifications. <a href="{{ route('notifications.index') }}" style="color: #78350f; text-decoration: underline; font-weight: 600;">View all</a></p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <!-- ✅ Welcome Section -->
             <div class="bg-bj p-4 rounded shadow-sm mb-4 text-center">
                 <h2 class="fw-bold text-dark mb-2">Welcome, {{ auth()->user()->name }}!</h2>
                 <p class="text-muted fs-6 mb-0">
                     We're glad to have you here. This is your personal space where you can
                     manage your orders, track reviews, update your profile, and connect with others.
-                    If you’re ready, you can also start your journey as a seller and grow your business.
+                    If you're ready, you can also start your journey as a seller and grow your business.
                 </p>
             </div>
 

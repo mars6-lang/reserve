@@ -1,17 +1,31 @@
 <!-- review-card.blade.php -->
 <div class="border rounded-lg shadow-sm p-4 mb-4">
-    <div class="flex items-top mb-3 space-x-3">
-        <img src="{{ $review->user->profile_photo_url }}" alt="{{ $review->user->name }}'s photo"
-            class="w-12 h-12 rounded-full object-cover border border-gray-300 shadow-sm aspect-square">
+    <div class="flex items-top mb-3 space-x-3 justify-between">
+        <div class="flex items-top space-x-3 flex-1">
+            <img src="{{ $review->user->profile_photo_url }}" alt="{{ $review->user->name }}'s photo"
+                class="w-12 h-12 rounded-full object-cover border border-gray-300 shadow-sm aspect-square">
 
-        <div class="min-w-0 max-w-full">
-            <strong>{{ $review->user->name }}</strong>
-            <small class="text-gray-500">{{ $review->created_at->diffForHumans() }}</small><br>
-            <strong class="text-yellow-500 text-sm">Rated:
-                {{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</strong><br>
-            <strong
-                class="text-gray-800 text-sm break-words whitespace-pre-line block mt-3">{{ $review->comment }}</strong>
+            <div class="min-w-0 max-w-full">
+                <strong>{{ $review->user->name }}</strong>
+                <small class="text-gray-500">{{ $review->created_at->diffForHumans() }}</small><br>
+                <strong class="text-yellow-500 text-sm">Rated:
+                    {{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</strong><br>
+                <strong
+                    class="text-gray-800 text-sm break-words whitespace-pre-line block mt-3">{{ $review->comment }}</strong>
+            </div>
         </div>
+
+        {{-- Edit/Delete buttons for review author --}}
+        @if (auth()->check() && auth()->id() === $review->user_id)
+            <div class="flex gap-2 ml-3">
+                <button class="text-sm text-blue-600 hover:underline" onclick="editReview({{ $review->id }}, {{ $review->rating }}, '{{ addslashes($review->comment) }}')">✏️ Edit</button>
+                <form action="{{ route('users.reviews.delete', $review->id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this review?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-sm text-red-600 hover:underline">🗑️ Delete</button>
+                </form>
+            </div>
+        @endif
     </div>
 
     @if ($review->photo)

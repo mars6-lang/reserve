@@ -116,9 +116,9 @@
                             <h3 class="fw-bold text-custom mb-0">{{ $seller->name }}</h3>
 
                             @if ($totalProducts > 4)
-                                <button class="btn btn-outline-custom btn-sm" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#sellerProducts{{ $index }}" aria-expanded="false"
-                                    aria-controls="sellerProducts{{ $index }}">
+                                <button class="btn btn-outline-custom btn-sm toggle-more-btn" type="button" 
+                                    data-target="#sellerProducts{{ $index }}"
+                                    style="cursor: pointer;">
                                     Show More
                                 </button>
                             @endif
@@ -173,7 +173,7 @@
 
                         {{-- Hidden extra products --}}
                         @if ($totalProducts > 4)
-                            <div class="collapse mt-3" id="sellerProducts{{ $index }}">
+                            <div class="seller-extra-products mt-3" id="sellerProducts{{ $index }}" style="display: none;">
                                 <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
                                     @foreach($seller->products->slice(4) as $product)
                                         <div class="col">
@@ -198,8 +198,9 @@
                                 </div>
 
                                 <div class="text-center mt-3">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#sellerProducts{{ $index }}">
+                                    <button class="btn btn-outline-secondary btn-sm toggle-less-btn" type="button" 
+                                        data-target="#sellerProducts{{ $index }}"
+                                        style="cursor: pointer;">
                                         Show Less
                                     </button>
                                 </div>
@@ -214,9 +215,38 @@
 
     </div>
 
-    {{-- Countdown script (keeps only relevant JS) --}}
+    {{-- Show More/Less toggle and countdown script --}}
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Handle Show More/Show Less buttons
+            const showMoreButtons = document.querySelectorAll('.toggle-more-btn');
+            const showLessButtons = document.querySelectorAll('.toggle-less-btn');
+            
+            showMoreButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.style.display = 'block';
+                        this.style.display = 'none';
+                    }
+                });
+            });
+            
+            showLessButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const targetElement = document.querySelector(targetId);
+                    const showMoreBtn = document.querySelector(`[data-target="${targetId}"].toggle-more-btn`);
+                    if (targetElement) {
+                        targetElement.style.display = 'none';
+                        if (showMoreBtn) {
+                            showMoreBtn.style.display = 'inline-block';
+                        }
+                    }
+                });
+            });
+
             function updateCountdowns() {
                 document.querySelectorAll(".countdown").forEach(function (el) {
                     let endTime = new Date(el.getAttribute("data-endtime")).getTime();

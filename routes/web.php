@@ -24,7 +24,11 @@ use App\Http\Controllers\NotificationController;
 // route for the landing page 
 Route::get('/', function () {
     // Show home page for all users (guests and authenticated)
-    return view('Home');
+    // Get featured products for dynamic carousel (latest 4 products)
+    $products = \App\Models\Users\products::latest()
+        ->take(4)
+        ->get();
+    return view('Home', compact('products'));
 })->name('home');
 
 
@@ -179,6 +183,9 @@ Route::namespace('App\Http\Controllers\Users')->prefix('users')->name('users.')-
             //review and comments ratings
             Route::post('/prodsDetails/{id}', 'reviewCommentsController@store')->name('reviews.store');
             Route::post('/reviews/{review}', 'reviewCommentsController@replyStore')->middleware('auth')->name('reviews.reply');
+            Route::get('/reviews/{id}/edit', 'reviewCommentsController@edit')->name('reviews.edit');
+            Route::put('/reviews/{id}', 'reviewCommentsController@update')->name('reviews.update');
+            Route::delete('/reviews/{id}', 'reviewCommentsController@delete')->name('reviews.delete');
 
             //users review on the prods they reviewed
             Route::get('/userReviews', 'reviewCommentsController@userReviews')->name('userReviews');

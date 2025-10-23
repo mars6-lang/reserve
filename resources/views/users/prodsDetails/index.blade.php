@@ -265,6 +265,25 @@
 
         <!-- Live Calculation Script -->
         <script>
+            // Global functions for edit modal
+            function editReview(reviewId, rating, comment) {
+                document.getElementById('editReviewId').value = reviewId;
+                document.getElementById('editRating').value = rating;
+                document.getElementById('editComment').value = comment;
+                document.getElementById('editReviewModal').style.display = 'block';
+            }
+
+            function closeEditModal() {
+                document.getElementById('editReviewModal').style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                const modal = document.getElementById('editReviewModal');
+                if (modal && event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+
             document.addEventListener("DOMContentLoaded", function () {
                 const quantityInput = document.getElementById('quantity');
                 const totalPriceEl = document.getElementById('totalPrice');
@@ -284,5 +303,90 @@
             });
         </script>
 
+        {{-- Edit Review Modal --}}
+        <div id="editReviewModal" class="hidden" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+            <div class="bg-white rounded-lg shadow-lg p-6 m-auto mt-20" style="width: 90%; max-width: 500px;">
+                <span onclick="closeEditModal()" style="float: right; cursor: pointer; font-size: 28px; font-weight: bold;">&times;</span>
+                <h2 class="text-2xl font-bold mb-4">Edit Review</h2>
+                
+                <form id="editReviewForm" method="POST" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="editReviewId" name="review_id">
+
+                    <div>
+                        <label for="editRating" class="form-label">Rating</label>
+                        <select name="rating" id="editRating" class="form-select" required>
+                            <option value="">-Select Rating-</option>
+                            @for($i = 5; $i >= 1; $i--)
+                                <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="editComment" class="form-label">Comment</label>
+                        <textarea name="comment" id="editComment" rows="3" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button type="submit" class="btn btn-primary">Update Review</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function submitEditForm(e) {
+                e.preventDefault();
+                const reviewId = document.getElementById('editReviewId').value;
+                const form = document.getElementById('editReviewForm');
+                
+                fetch(`/users/reviews/${reviewId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({
+                        rating: form.rating.value,
+                        comment: form.comment.value
+                    })
+                })
+                .then(response => {
+                    // Check if response is valid JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('Server returned non-JSON response (HTTP ' + response.status + ')');
+                    }
+                    return response.json().then(data => ({
+                        status: response.status,
+                        data: data
+                    }));
+                })
+                .then(result => {
+                    if (result.status === 200 && result.data.success) {
+                        alert(result.data.message || 'Review updated successfully!');
+                        closeEditModal();
+                        window.location.reload();
+                    } else {
+                        alert(result.data.message || 'Error updating review');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Error updating review: ' + err.message);
+                });
+            }
+
+            // Attach form submit handler when DOM is ready
+            document.addEventListener('DOMContentLoaded', function() {
+                const editForm = document.getElementById('editReviewForm');
+                if (editForm) {
+                    editForm.addEventListener('submit', submitEditForm);
+                }
+            });
+        </script>
 
 @endsection

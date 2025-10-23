@@ -23,57 +23,58 @@
             <!-- Reservations List -->
             @forelse ($orders as $order)
                 @if ($order->product)
-                    <div class="bg-white rounded-lg shadow-md mb-4 p-5 hover:shadow-lg transition">
-                        <div class="flex flex-col md:flex-row gap-5">
-                            <!-- Product Image -->
-                            <div class="md:w-24 h-24 flex-shrink-0">
-                                <img src="{{ asset('storage/' . $order->product->image) }}" 
-                                    alt="{{ $order->product->title }}"
-                                    class="w-full h-full object-cover rounded-lg border">
-                            </div>
-
-                            <!-- Reservation Details -->
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div>
-                                        <h3 class="text-lg font-bold text-gray-800">{{ $order->product->title }}</h3>
-                                        <p class="text-sm text-gray-600">Seller: <strong>{{ $order->seller->name ?? 'Unknown' }}</strong></p>
-                                    </div>
-                                    
-                                    <!-- Status Badge -->
-                                    <span class="px-4 py-2 rounded-full text-white text-sm font-semibold
-                                        @if($order->status === 'active') bg-yellow-500
-                                        @elseif($order->status === 'received') bg-blue-500
-                                        @elseif($order->status === 'completed') bg-green-500
-                                        @elseif($order->status === 'cancelled') bg-red-500
-                                        @endif">
-                                        {{ ucfirst($order->status) }}
-                                    </span>
+                    <a href="{{ route('users.prodsDetails', $order->product->id) }}" class="text-decoration-none text-dark">
+                        <div class="bg-white rounded-lg shadow-md mb-4 p-5 hover:shadow-lg transition" style="cursor: pointer; transition: all 0.3s ease;">
+                            <div class="flex flex-col md:flex-row gap-5">
+                                <!-- Product Image -->
+                                <div class="md:w-24 h-24 flex-shrink-0">
+                                    <img src="{{ asset('storage/' . $order->product->image) }}" 
+                                        alt="{{ $order->product->title }}"
+                                        class="w-full h-full object-cover rounded-lg border">
                                 </div>
 
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                                    <div>
-                                        <p class="text-xs text-gray-500">Quantity</p>
-                                        <p class="font-semibold text-gray-800">{{ $order->quantity }} kg</p>
+                                <!-- Reservation Details -->
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h3 class="text-lg font-bold text-gray-800">{{ $order->product->title }}</h3>
+                                            <p class="text-sm text-gray-600">Seller: <strong>{{ $order->seller->name ?? 'Unknown' }}</strong></p>
+                                        </div>
+                                        
+                                        <!-- Status Badge -->
+                                        <span class="px-4 py-2 rounded-full text-white text-sm font-semibold
+                                            @if($order->status === 'active') bg-yellow-500
+                                            @elseif($order->status === 'received') bg-blue-500
+                                            @elseif($order->status === 'completed') bg-green-500
+                                            @elseif($order->status === 'cancelled') bg-red-500
+                                            @endif">
+                                            {{ ucfirst($order->status) }}
+                                        </span>
                                     </div>
-                                    <div>
-                                        <p class="text-xs text-gray-500">Unit Price</p>
-                                        <p class="font-semibold text-gray-800">₱{{ number_format($order->product->price, 2) }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-500">Total Price</p>
-                                        <p class="font-bold text-green-600 text-lg">₱{{ number_format($order->total_price, 2) }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-500">Reserved On</p>
-                                        <p class="font-semibold text-gray-800">{{ $order->created_at->format('M d, Y') }}</p>
-                                    </div>
-                                </div>
 
-                                <!-- Timeline Info -->
-                                <div class="text-xs text-gray-500 mb-3">
-                                    <p>📅 Reserved: {{ $order->created_at->format('M d, Y g:i A') }}</p>
-                                </div>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                                        <div>
+                                            <p class="text-xs text-gray-500">Quantity</p>
+                                            <p class="font-semibold text-gray-800">{{ $order->quantity }} kg</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Unit Price</p>
+                                            <p class="font-semibold text-gray-800">₱{{ number_format($order->product->price, 2) }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Total Price</p>
+                                            <p class="font-bold text-green-600 text-lg">₱{{ number_format($order->total_price, 2) }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Reserved On</p>
+                                            <p class="font-semibold text-gray-800">{{ $order->created_at->format('M d, Y') }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Timeline Info -->
+                                    <div class="text-xs text-gray-500 mb-3">
+                                        <p>📅 Reserved: {{ $order->created_at->format('M d, Y g:i A') }}</p>
+                                    </div>
 
                                 <!-- Actions -->
                                 @if($order->status === 'active')
@@ -105,7 +106,8 @@
                                 @endif
                             </div>
                         </div>
-                    </div>
+                        </div>
+                    </a>
                 @endif
             @empty
                 <div class="bg-white rounded-lg shadow-md p-12 text-center">
