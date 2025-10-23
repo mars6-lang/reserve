@@ -423,7 +423,7 @@
             @endauth
         </p>
         <p class="hero-subtitle">
-            Aparri Fish Market connects local fishermen and seafood sellers with buyers across the region.
+            Aparri Fish Market connects local fishermen and seafood sellers with buyers across town.
             Our goal is to bring <strong>fresh, traceable, and affordable seafood</strong> directly to your
             table while supporting the livelihood of our fisherfolk through digital trade.
         </p>
