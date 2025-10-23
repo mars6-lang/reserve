@@ -1,4 +1,4 @@
-@extends('layouts.Seller.Sellerapp')
+@extends('layouts.Users.Homeapp')
 @section('content')
     <div class="container mb-6 max-w-xl mx-auto">
 

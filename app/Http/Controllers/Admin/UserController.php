@@ -3,117 +3,56 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+
+use App\Models\User;
+use App\Models\Users\SellerApplication;
 use App\Models\Users\reportprods;
 use App\Notifications\SellerStatusNotification;
-use Illuminate\Support\Facades\Notification;
-use Gate;
-use DB;
-
-
-
-
-
 
 class UserController extends Controller
 {
-
-
-    public function __contruct()
+    public function __construct()
     {
         $this->middleware('auth');
     }
 
-
     /**
-     * Display a listing of the resource.
+     * Display a listing of the users.
      */
     public function index()
     {
-        // denies the gate if 
         if (Gate::denies('admin-access')) {
             return redirect('errors.403');
         }
 
-        $allusers = User::where('id', '>=', '3')->paginate(10); // get only records that start with id 3 and below
-        // query using model eloquent 
+        $allusers = User::where('id', '>=', '3')->paginate(10);
 
         return view('admin.users.index')
             ->with('allusers', $allusers);
-
     }
-
-
 
     public function userProdsReport()
     {
-
         $reports = reportprods::with('product', 'user')->latest()->paginate(20);
         return view('admin.userProdsReport.view', compact('reports'));
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function updateStatus(Request $request, $id)
     {
+        $application = SellerApplication::findOrFail($id);
+        $application->status = $request->status; // 'approved' or 'rejected'
+        $application->save();
 
+        return redirect()->back()->with('success', 'Application updated!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(User $user)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(User $user)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, User $user)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
-    {
-        //
-    }
-
-
-    // new function added for viewing all user feedbacks 
     public function userfeedback()
     {
-
-
         $allfeedbacks = DB::table('feedbacks')
             ->select('*')
             ->paginate(10);
@@ -121,4 +60,39 @@ class UserController extends Controller
         return view('admin.users.feedbacks.show')
             ->with('allfeedbacks', $allfeedbacks);
     }
+
+
+
+
+    public function Apkindex()
+    {
+        $applications = SellerApplication::with('user')->latest()->get();
+        return view('admin.userApkForm.Apkindex', compact('applications'));
+    }
+
+    public function approve($id)
+    {
+        $application = SellerApplication::findOrFail($id);
+
+        // ✅ Update application status
+        $application->update(['status' => 'approved']);
+
+        // ✅ Update user flags
+        $application->user->update([
+            'is_seller' => 1,
+            'is_verified_seller' => 1, // <- this enables the Verified Seller badge
+        ]);
+
+        return back()->with('success', 'Application approved successfully!');
+    }
+
+    public function reject($id)
+    {
+        $application = SellerApplication::findOrFail($id);
+
+        $application->update(['status' => 'rejected']);
+
+        return back()->with('error', 'Application rejected.');
+    }
+
 }

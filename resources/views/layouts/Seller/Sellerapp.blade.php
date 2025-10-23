@@ -53,13 +53,13 @@
     <div class="min-h-screen bg-gray-100">
         @include('layouts.Seller.Sellernav')
 
-        <main>
-            @yield('content')
-        </main>
-    </div>
 
-    <!-- ✅ Put this INSIDE the body, before closing tag -->
-    @yield('scripts')
+    </div>
+    <main>
+        @yield('scripts')
+    </main>
+    @include('seller.partials.terms-modal')
+
 </body>
 
 </html>

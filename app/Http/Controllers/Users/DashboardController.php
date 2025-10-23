@@ -71,7 +71,10 @@ class DashboardController extends Controller
     }
 
 
-
+    public function systemMessages()
+    {
+        return view('users.systemMesages.index');
+    }
 
 
 

@@ -19,7 +19,7 @@ return new class extends Migration {
              $table->string('photo')->nullable();
             $table->timestamps();
 
-            //$table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }
 

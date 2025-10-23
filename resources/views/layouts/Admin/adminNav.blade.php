@@ -89,7 +89,7 @@
 
         <!-- Navigation Links -->
         <nav class="flex flex-col space-y-5 text-lg text-gray-700 mt-5">
-            <a href="{{ route('Home') }}" class="nav-link px-3 py-2 rounded hover:bg-gray-100">Home</a>
+            <a href="{{ route('dashboard') }}" class="nav-link px-3 py-2 rounded hover:bg-gray-100">Home</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"

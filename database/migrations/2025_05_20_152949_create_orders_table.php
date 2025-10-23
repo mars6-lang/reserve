@@ -14,9 +14,6 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('user_id')->constrained()->onDelete('cascade');     // Buyer
             $table->unsignedBigInteger('product_id')->constrained()->onDelete('cascade');
-            $table->integer('quantity');
-            $table->decimal('custom_price', 10, 2)->nullable();
-            $table->string('payment_method')->default('cod');
             $table->decimal('total_price', 10, 2);
 
 

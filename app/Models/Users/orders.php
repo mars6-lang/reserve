@@ -17,6 +17,7 @@ class orders extends Model
         'custom_price',
         'total_price',
         'payment_method',
+        'status',
     ];
 
 
@@ -61,6 +62,11 @@ class orders extends Model
     public function isActive()
     {
         return $this->status === 'active';
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(\App\Models\Users\orders::class, 'product_id');
     }
 
 

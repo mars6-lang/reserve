@@ -38,9 +38,9 @@ class UsersTableSeeder extends Seeder
         ]);
 
         $admin1 = User::create([
-            'name' => 'MainAdmin',
-            'email' => 'MainAdmin@gmail.com',
-            'password' => Hash::make('11111111')
+            'name' => 'Administrator(Leo)',
+            'email' => 'l30pmsit@gmail.com',
+            'password' => Hash::make('1234')
         ]);
 
         $user = User::create([
@@ -86,3 +86,6 @@ class UsersTableSeeder extends Seeder
    
     }
 }
+
+
+

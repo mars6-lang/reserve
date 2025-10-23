@@ -7,59 +7,96 @@
             <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">My reserved products</h2>
 
             @forelse ($orders as $order)
-                <div class="bg-white rounded-xl shadow-md mb-6 p-4 sm:flex sm:gap-5 sm:items-start">
-                    <!-- Product Image -->
-                    <div class="w-full sm:w-28 h-28 mb-3 sm:mb-0 flex-shrink-0">
-                        <img src="{{ $order->product->image ? asset('storage/' . $order->product->image) : 'https://via.placeholder.com/100' }}"
-                            alt="{{ $order->product->title }}" class="w-full h-full object-cover rounded-lg border">
-                    </div>
-
-                    <!-- Order Info -->
-                    <div class="flex-1">
-                        <div class="flex justify-between items-center mb-1">
-                            <h3 class="text-sm font-semibold text-gray-800">{{ $order->product->title }}</h3>
+                @if ($order->product) {{-- ✅ Check if product exists --}}
+                    <div class="bg-white rounded-xl shadow-md mb-6 p-4 sm:flex sm:gap-5 sm:items-start">
+                        <!-- Product Image -->
+                        <div class="w-full sm:w-28 h-28 mb-3 sm:mb-0 flex-shrink-0">
+                            <img src="{{ asset('storage/' . $order->product->image) }}" alt="{{ $order->product->title }}"
+                                class="w-full h-full object-cover rounded-lg border">
                         </div>
 
-                        <p class="text-sm text-gray-700 mt-3"><span class="font-medium">Quantity:</span> {{ $order->quantity }}
-                            kilo{{ $order->quantity > 1 ? 's' : '' }}</p>
+                        <!-- Order Info -->
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center mb-1">
+                                <h3 class="text-sm font-semibold text-gray-800">{{ $order->product->title }}</h3>
+                            </div>
 
-                        @if ($order->custom_price)
-                            <p class="text-sm text-red-600 font-medium">Your Offered Price:
-                                ₱{{ number_format($order->custom_price, 2) }}</p>
-                        @endif
+                            <p class="text-sm text-gray-700 mt-3">
+                                <span class="font-medium">Quantity:</span> {{ $order->quantity }}
+                                kilo{{ $order->quantity > 1 ? 's' : '' }}
+                            </p>
 
-                        <p class="text-sm text-gray-700"><span class="font-medium">Total Price:</span>
-                            ₱{{ number_format($order->total_price, 2) }}</p>
+                            @if ($order->custom_price)
+                                <p class="text-sm text-red-600 font-medium">
+                                    Your Offered Price: ₱{{ number_format($order->custom_price, 2) }}
+                                </p>
+                            @endif
 
-                        <p class="text-sm text-gray-700"><span class="font-medium">Payment Method:</span>
-                            <span class="inline-block bg-gray-100 text-gray-700 rounded px-2 py-0.5 text-xs capitalize">
-                                {{ str_replace('_', ' ', $order->payment_method) }}
-                            </span>
-                        </p>
-                        <span class="text-xs text-gray-500">{{ $order->created_at->format('M d, Y g:i A') }}</span>
-                    </div>
+                            <p class="text-sm text-gray-700">
+                                <span class="font-medium">Total Price:</span>
+                                ₱{{ number_format($order->total_price, 2) }}
+                            </p>
 
+                            <p class="text-sm text-gray-700">
+                                <span class="font-medium">Payment Method:</span>
+                                <span class="inline-block bg-gray-100 text-gray-700 rounded px-2 py-0.5 text-xs capitalize">
+                                    {{ str_replace('_', ' ', $order->payment_method) }}
+                                </span>
+                            </p>
 
-                    <div class="">
-                        @if ($order->status === 'active')
-                            <form method="POST" action="{{ route('users.orders.cancel', $order->id) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit"
-                                    class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded shadow-sm"
-                                    onclick="return confirm('Are you sure you want to cancel this order?');">
-                                    Cancel Order
+                            <span class="text-xs text-gray-500">{{ $order->created_at->format('M d, Y g:i A') }}</span>
+                        </div>
+
+                        <!-- Buyer Actions -->
+                        <div class="flex items-center gap-2">
+                            @if ($order->status === 'active')
+                                <!-- Mark as Received -->
+                                <form method="POST" action="{{ route('users.orders.markReceived', $order->id) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded shadow-sm"
+                                        onclick="return confirm('Confirm you have received this order?');">
+                                        Mark as Received
+                                    </button>
+                                </form>
+
+                                <!-- Cancel Order -->
+                                <form method="POST" action="{{ route('users.orders.cancel', $order->id) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit"
+                                        class="bg-danger hover:bg-red-600 text-white text-sm px-4 py-2 rounded shadow-sm"
+                                        onclick="return confirm('Are you sure you want to cancel this order?');">
+                                        Cancel Order
+                                    </button>
+                                </form>
+                            @elseif ($order->status === 'received')
+                                <button type="button"
+                                    class="bg-indigo-500 text-success text-sm px-4 py-2 rounded shadow-sm cursor-default">
+                                    Received
                                 </button>
-                            </form>
-                        @else
-                            <button type="button"
-                                class="bg-gray-300 text-gray-500 text-sm px-4 py-2 rounded shadow-sm cursor-not-allowed" disabled>
-                                Cancelled
-                            </button>
-                        @endif
-                    </div>
-                </div>
+                            @elseif ($order->status === 'completed')
+                                <button type="button"
+                                    class="bg-gray-400 text-success text-sm px-4 py-2 rounded shadow-sm cursor-not-allowed" disabled>
+                                    Completed
+                                </button>
+                            @elseif ($order->status === 'cancelled')
+                                <button type="button"
+                                    class="bg-blue-500 text-white text-sm px-4 py-2 rounded shadow-sm cursor-not-allowed" disabled>
+                                    Cancelled
+                                </button>
+                            @endif
+                        </div>
 
+
+
+                    </div>
+                @else
+                    <div class="bg-white rounded-xl shadow-md mb-6 p-4 text-red-500">
+                        ⚠️ This order refers to a deleted or missing product.
+                    </div>
+                @endif
             @empty
                 <div class="text-center text-gray-500 mt-10">
                     <p class="text-lg">You haven't ordered anything yet.</p>
@@ -67,6 +104,5 @@
             @endforelse
         </div>
     </div>
-
 
 @endsection

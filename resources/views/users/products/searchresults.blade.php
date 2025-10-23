@@ -31,10 +31,10 @@
         }
     </style>
 
-    <div class="py-3">
+    <div class="py-3 bg-light">
         <div class="container">
+           
             <h5 class="mb-3">Search Results: {{ count($searchresults) }}</h5>
-
             <div class="row g-3">
                 @forelse($searchresults as $prods)
                     <div class="col-lg-4 col-md-6 col-sm-12">

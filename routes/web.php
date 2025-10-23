@@ -4,7 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Admin\adminToolController;
+use App\Http\Controllers\NotificationController;
+
 
 
 
@@ -28,32 +29,44 @@ Route::get('/', function () {
 
 
 // redirects to specific dashboard based on the role of the user 
-Route::get('/Home', function () {
-    if (Auth::user()->roles[0]->name == "admin") {
-        return view('admin.dashboard');
-    } elseif (Auth::user()->roles[0]->name == "seller") {
-        return view('seller.dashboard'); // your seller homepage view
-    } else {
-        return view('users.HomePage'); // regular user homepage
+Route::get('/dashboard', function () {
+    if (Auth::check()) {
+        $user = Auth::user();
+        $role = $user->roles[0]->name ?? 'user';
+
+        if ($role === 'admin') {
+            return view('admin.dashboard');
+        } elseif ($user->is_seller) {
+            // redirect to SellerController@index
+            return redirect()->route('seller.dashboard.index');
+        } else {
+            // normal user → Market page
+            return redirect()->route('users.Market.index');
+        }
     }
 
+    return redirect()->route('login');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::middleware('auth')->group(function () {
+    // Buyer and Seller notifications (same controller, different filters)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/seller/notifications', [NotificationController::class, 'seller'])->name('notifications.seller');
 
-})->middleware(['auth', 'verified'])->name('Home');
+    // Mark read / delete
+    Route::post('/notifications/read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.delete');
+    Route::delete('/notifications', [NotificationController::class, 'destroyAll'])->name('notifications.deleteAll');
 
+    // JSON checks (for red dot display)
+    Route::get('/notifications/check', [NotificationController::class, 'check'])->name('notifications.check');
+    Route::get('/seller/notifications/check', [NotificationController::class, 'sellerCheck'])->name('notifications.sellerCheck');
 
+    Route::get('/notifications/open/{id}', [NotificationController::class, 'open'])
+        ->name('notifications.open');
+});
 
-
-//for notification
-Route::post('/notifications/read/{id}', function ($id) {
-    $notification = auth()->user()->notifications()->findOrFail($id);
-    $notification->markAsRead();
-    return back();
-})->name('markNotificationRead');
-Route::post('/notifications/read-all', function () {
-    auth()->user()->unreadNotifications->markAsRead();
-    return back();
-})->name('markAllNotificationsRead');
 
 
 
@@ -63,6 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/chatroom/{user}', 'App\Http\Controllers\ChatController@show')->name('chatroom.show');
     Route::post('/chatroom/{user}', 'App\Http\Controllers\ChatController@store')->name('chatroom.store');
 });
+
 
 
 
@@ -80,17 +94,35 @@ Route::
             // add routes here for admin 
             Route::resource('/users', 'UserController', ['except' => ['create', 'store', 'destroy']]);
             Route::get('/userfeedbacks', 'UserController@userfeedback')->name('userfeedback');
-
-
             //user reports
             Route::get('/userProdsReport', 'UserController@userProdsReport')->name('userProdsReport');
-
-
-
             //admin actions to reported shits
             Route::post('/seller/{id}/warning', 'adminToolController@warning')->name('warning');
             Route::post('/seller/{id}/suspend', 'adminToolController@suspend')->name('suspend');
             Route::delete('/seller/{id}/ban', 'adminToolController@ban')->name('ban');
+
+
+            //seller or user application form route
+            Route::get('seller-applications', 'UserController@Apkindex')
+                ->name('Apkindex')
+                ->middleware('auth');
+
+            Route::post('seller-applications/{id}/status', 'UserController@updateStatus')
+                ->name('seller-applications.updateStatus')
+                ->middleware('auth');
+
+
+
+            Route::post('/seller-applications/{id}/approve', 'UserController@approve')
+                ->name('admin.approve');
+
+            Route::post('/seller-applications/{id}/reject', 'UserController@reject')
+                ->name('admin.reject');
+
+
+
+
+
 
 
 
@@ -113,8 +145,6 @@ Route::
             // eto route ng search products
             Route::get('/searchproducts', 'CTRLproducts@searchproducts')->name('searchproducts');
 
-            //user dashboard
-            Route::resource('/HomePage', 'HomePageController');
 
             //dashboard
             Route::resource('/dashboard', 'DashboardController');
@@ -122,40 +152,61 @@ Route::
             Route::post('/register', 'DashboardController@register')->name('register')->middleware('auth');
 
 
-            //register account to seller route shit
+            //register account to seller 
             Route::get('/registeraccount', 'DashboardController@registeraccount')->name('registeraccount');
 
             Route::get('/addprods', function () {
                 return view('users.addproduct.create');
 
+
             });
+
+            Route::post('/registeraccount', 'SellerApplicationController@store')
+                ->name('registeraccount')
+                ->middleware('auth');
 
 
             // User places an order
             Route::post('/order', 'orderController@prodsDetailsStore')->name('order');
             Route::get('/myOrders', 'prodsDetailsCRTL@myOrders')->name('myOrders');
             Route::patch('/cancelorders/{order}', 'orderController@cancel')->name('orders.cancel');
-
-            //report some shit
+            Route::patch('/orders/{order}/received', 'orderController@markReceived')->name('orders.markReceived');
+            //repor
             Route::get('/ProdsReport/{id}', 'prodsDetailsCRTL@ProdsReport')->name('ProdsReport');
             Route::post('/ProdsReport/{id}', 'prodsDetailsCRTL@reportstore')->name('ProdsReport');
-
-            //market products displays and some analysis routes
-            Route::resource('/Market', 'marketController');
-            Route::get('/prodsDetails/{id}', 'marketController@prodsDetails')->name('prodsDetails');
-
-
-            //contact and about route
-            //Route::get('/contactUs', 'HomePageController@contactsindex')->name('contactsindex');
-            Route::get('/about', 'HomePageController@about')->name('about');
-
 
 
             //review and comments ratings
             Route::post('/prodsDetails/{id}', 'reviewCommentsController@store')->name('reviews.store');
-
-
             Route::post('/reviews/{review}', 'reviewCommentsController@replyStore')->middleware('auth')->name('reviews.reply');
+
+            //users review on the prods they reviewed
+            Route::get('/userReviews', 'reviewCommentsController@userReviews')->name('userReviews');
+
+            //System messages
+            Route::get('/systemMessages', 'DashboardController@systemMessages')->name('systemMessages');
+
+
+
+
+            //item search users.itemSearch.index
+            Route::resource('/searchView', 'CTRLproducts');
+            Route::get('/searchView', 'CTRLproducts@searchIndex')->name('searchIndex');
+
+
+
+
+            Route::get('/appinfo', 'HomePageController@about')->name('appinfo.about');
+
+
+            Route::get('/market/category/{category}', 'marketController@Catindex')->name('users.ShopCategory.Catindex');
+
+
+
+
+
+
+
 
 
 
@@ -164,49 +215,57 @@ Route::
 
         });
 
+Route::prefix('users')->name('users.')->group(function () {
+    Route::get('/HomePage', 'App\Http\Controllers\Users\HomePageController@index')->name('HomePage.index');
+    Route::get('/Market', 'App\Http\Controllers\Users\marketController@index')->name('Market.index');
+    Route::get('/prodsDetails/{id}', 'App\Http\Controllers\Users\marketController@prodsDetails')->name('prodsDetails');
+});
 
 
 
 
 
 
-//seller shits
+
+//seller
 Route::group([
     'namespace' => 'App\Http\Controllers\Seller',
     'prefix' => 'seller',
     'as' => 'seller.',
-    'middleware' => ['auth', 'is_seller',]
+    'middleware' => ['auth', 'can:seller-access'],
 ], function () {
-
     // Seller Dashboard
     Route::resource('/dashboard', 'SellerController');
     //seller adding products
     Route::get('/sellerAdd', 'SellerController@sellerAdd')->name('sellerAdd');
     Route::post('/sellerStore', 'SellerController@sellerStore')->name('sellerStore');
-
     //seller product ratings
     Route::get('/productsRatings', 'SellerController@productsRatings')->name('productsRatings');
-
-
     //seller manage products
     Route::get('/sellerManageProds', 'SellerController@ManageProds')->name('ManageProds');
     Route::put('/sellerManageProds/{products}', 'SellerController@Prodsupdate')->name('sellerManageProds');
+    Route::delete('/sellerprodsDelete/{id}', 'SellerController@deleteProds')->name('deleteProds');
     //route for manage prods EDIT BTN
     Route::get('/sellerManageProds/{products}/ManageProdsEdit', 'SellerController@ManageProdsEdit')->name('sellerManageProds.ManageProdsEdit');
-
     //for seller order list
+    // Seller Orders List
     Route::get('/ordersList', 'SellerController@ordersList')->name('ordersList');
-    Route::patch('/seller/orders/{order}/complete', 'SellerController@markCompleted')->name('markCompleted');
 
-    //route for notifications
-    Route::get('/notification', 'SellerController@notindex')->name('notindex');
-    Route::delete('/notification/{id}', 'SellerController@notidelete')->name('notidelete');
-    Route::delete('/notification', 'SellerController@deleteall')->name('deleteall');
+    // Mark as Completed
+    Route::patch('/seller/orders/{order}/complete', 'SellerController@markCompleted')->name('seller.markCompleted');
 
+    // Mark as Received
+    Route::patch('/seller/orders/{order}/received', 'SellerController@markReceived')->name('seller.markReceived');
 
     //market monitoring
     Route::get('/market-analysis', 'SellerController@marketanalysis')->name('analysis.marketanalysis');
     Route::post('/market-monitoring/store', 'SellerController@marketstore')->name('marketstore');
+
+
+
+    Route::post('/terms/accept', 'SellerController@accept')
+        ->name('terms.accept')
+        ->middleware(['auth', 'is_seller']);
 
 });
 
@@ -219,10 +278,8 @@ Route::middleware('auth')->get('/become-seller', function () {
 
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
 
 
-})->middleware('auth');
+
 
 require __DIR__ . '/auth.php';

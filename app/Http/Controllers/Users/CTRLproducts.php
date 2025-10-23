@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use App\Models\Users\SearchLog;
 use App\Models\Users\products;
 use DB;
 
@@ -39,53 +39,30 @@ class CTRLproducts extends Controller
         return redirect()->back();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function searchIndex(Request $request)
     {
-        //
+        $keyword = $request->input('keyword');
+
+        if ($keyword) {
+            SearchLog::create([
+                'keyword' => $keyword,
+                'user_id' => auth()->id(),
+            ]);
+        }
+
+        $results = products::where('title', 'like', "%{$keyword}%")->get();
+
+        // Get popular searches (top 5 most searched)
+        $popularSearches = SearchLog::select('keyword')
+            ->groupBy('keyword')
+            ->orderByRaw('COUNT(*) DESC')
+            ->limit(5)
+            ->pluck('keyword');
+
+        return view('users.searchView.index', compact('results', 'popularSearches'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 
     public function prodsDetails($id)
     {
@@ -97,7 +74,7 @@ class CTRLproducts extends Controller
 
     public function searchresults()
     {
-        
+
     }
 
 
@@ -107,27 +84,15 @@ class CTRLproducts extends Controller
     public function searchproducts(Request $request)
     {
         $keyword = $request->input('keyword');
-        $category = $request->input('category'); // This is the selected category from the dropdown
 
         $searchresults = DB::table('products')
             ->select('*')
             ->when($keyword, function ($query) use ($keyword) {
-                $query->where(function ($q) use ($keyword) {
-                    $q->where('title', 'LIKE', '%' . $keyword . '%')
-                        ->orWhere('description', 'LIKE', '%' . $keyword . '%');
-                });
-            })
-            ->when($category, function ($query) use ($category) {
-                $query->where('category', $category);
+                $query->where('title', 'LIKE', '%' . $keyword . '%');
             })
             ->get();
 
-        $categories = DB::table('products')->distinct()->pluck('category');
-      
-
-        return view('users.products.searchresults', [
-            'searchresults' => $searchresults,
-            'categories' => $categories,
-        ]);
+        return view('users.products.searchresults', compact('searchresults'));
     }
+
 }

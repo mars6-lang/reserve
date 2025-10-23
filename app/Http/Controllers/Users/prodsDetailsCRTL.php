@@ -25,10 +25,12 @@ class prodsDetailsCRTL extends Controller
      */
     public function myOrders()
     {
-        $orders = orders::with('product')  // eager load product
+        $orders = orders::with('product')
             ->where('user_id', auth()->id())
+            ->whereHas('product') // only fetch orders with valid product
             ->latest()
             ->get();
+
         return view('users.myOrders.myOrders', compact('orders'));
     }
 

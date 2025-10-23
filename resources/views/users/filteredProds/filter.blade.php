@@ -1,4 +1,4 @@
-@can('user-access')
+
     @extends('layouts.Users.Homeapp')
 
     @section('content')
@@ -36,4 +36,3 @@
             @endif
         </div>
     @endsection
-@endcan

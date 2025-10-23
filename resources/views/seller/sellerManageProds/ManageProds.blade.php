@@ -1,4 +1,4 @@
-@extends('layouts.Seller.Sellerapp')
+@extends('layouts.Users.Homeapp')
 @section('content')
 
     @if (session('success') === 'success')
@@ -7,10 +7,12 @@
             Product updated!
         </div>
     @endif
-    <div class="bg-light">
-        <div class="container py-5">
-            <h2 class="mb-4 fw-bold text-center">Manage My Products</h2>
 
+
+
+    <div class="bg-light p-3 p-md-5 rounded">
+
+        <div class="container py-5">
             @forelse($products as $product)
                 <div class="card mb-3 p-3">
                     <div class="d-flex align-items-start gap-3 flex-wrap">
@@ -40,7 +42,9 @@
                                 <input type="hidden" id="unitPrice" value="{{ $discountedPrice }}">
 
                                 <p class="mb-0">
-                                    <strong class="text-success small">₱{{ number_format($discountedPrice, 2) }} / kilo</strong>
+                                    <strong class="text-success small">₱{{ number_format($discountedPrice, 2) }}
+                                        /
+                                        kilo</strong>
                                     @if($hasDiscount)
                                         <span class="text-muted text-decoration-line-through small">
                                             ₱{{ number_format($product->price, 2) }}
@@ -55,7 +59,7 @@
                                 <a href="{{ route('seller.sellerManageProds.ManageProdsEdit', $product->id) }}"
                                     class="btn btn-warning btn-sm w-100">Edit</a>
 
-                                <form action="" method="POST" class="w-100">
+                                <form action="{{ route('seller.deleteProds', $product->id) }}" method="POST" class="w-100">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm w-100"
@@ -74,8 +78,7 @@
                 </div>
             @endforelse
         </div>
+
     </div>
-
-
 
 @endsection

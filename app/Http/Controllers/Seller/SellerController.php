@@ -32,9 +32,7 @@ class SellerController extends Controller
         return view('sellers.chatroom', compact('buyer'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
         //
@@ -58,18 +56,13 @@ class SellerController extends Controller
 
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function sellerStore(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'category' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
             'description' => 'nullable|string',
-            'discount_percent' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $path = $request->file('image') ? $request->file('image')->store('products', 'public') : null;
@@ -78,19 +71,14 @@ class SellerController extends Controller
             'user_id' => auth()->id(),
             'title' => $request->title,
             'price' => $request->price,
-            'stocks' => $request->stocks,
-            'category' => $request->category,
             'description' => $request->description,
             'image' => $path,
-            'discount_percent' => $request->discount_percent,
         ]);
 
         return redirect()->route('seller.sellerAdd')->with('success', 'Product added successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function Prodsupdate(Request $request, $id)
     {
         // Find the product by ID
@@ -103,6 +91,8 @@ class SellerController extends Controller
             'stocks' => 'nullable|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'discount_percent' => 'nullable|numeric|min:0|max:100',
+            'discount_start' => 'nullable|date',
+            'discount_end' => 'nullable|date|after:discount_start',
         ]);
 
         // Handle image upload if present
@@ -111,11 +101,39 @@ class SellerController extends Controller
             $validated['image'] = $path;
         }
 
+        // If discount is applied, compute the discounted price
+        if (!empty($validated['discount_percent'])) {
+            $discount = $validated['discount_percent'];
+            $validated['discount_price'] = $validated['price'] - ($validated['price'] * ($discount / 100));
+
+            // Default dates if not provided
+            $validated['discount_start'] = $validated['discount_start'] ?? now();
+            $validated['discount_end'] = $validated['discount_end'] ?? now()->addDays(7);
+
+            // 🔥 Add flash sale fields
+            $validated['flash_price'] = $validated['discount_price'];
+            $validated['flash_start'] = $validated['discount_start'];
+            $validated['flash_end'] = $validated['discount_end'];
+
+        } else {
+            // No discount → reset values
+            $validated['discount_price'] = null;
+            $validated['discount_start'] = null;
+            $validated['discount_end'] = null;
+
+            // Reset flash sale too
+            $validated['flash_price'] = null;
+            $validated['flash_start'] = null;
+            $validated['flash_end'] = null;
+        }
+
+
         // Update the product
         $product->update($validated);
 
-        return redirect()->route('seller.dashboard.index')->with('success', 'Product updated!');
+        return redirect()->route('seller.dashboard.index')->with('success', 'Product updated with discount!');
     }
+
 
 
     public function ManageProdsEdit($id)
@@ -125,11 +143,34 @@ class SellerController extends Controller
     }
 
 
+    public function deleteProds($id)
+    {
+        $product = products::findOrFail($id);
+
+        // Optional ownership check
+        if ($product->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $product->delete();
+
+        return redirect()->back()->with('success', 'Product deleted successfully.');
+    }
+
+
 
     public function notindex()
     {
-        return view('seller.notification.notindex');
+        $user = Auth::user();
+
+        // Mark all unread notifications as read when viewing
+        $user->unreadNotifications->markAsRead();
+
+        $notifications = $user->notifications()->latest()->get();
+
+        return view('seller.notification.notindex', compact('notifications'));
     }
+
 
     public function notidelete($id)
     {
@@ -183,18 +224,19 @@ class SellerController extends Controller
             ->with(['product', 'user'])
             ->latest()
             ->get()
-            ->unique(function ($order) {
-                return $order->user_id . '-' . $order->product_id;
-            });
+            ->unique(fn($order) => $order->user_id . '-' . $order->product_id);
+
+
+
 
         return view('seller.ordersList.odersIndex', compact('orders'));
-
     }
 
 
-    public function markCompleted(orders $order)
+
+    public function markCompleted(Orders $order)
     {
-        // Optional: make sure the authenticated seller owns this order
+        // Ensure only the seller can mark their orders
         if ($order->seller_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
@@ -211,13 +253,24 @@ class SellerController extends Controller
             'custom_price' => $order->custom_price > 0 ? $order->custom_price : null,
             'quantity' => $order->quantity,
             'market_date' => now()
-
-
-
-
         ]);
 
         return redirect()->back()->with('success', 'Order marked as completed and added to market data.');
+    }
+
+    public function markReceived(Orders $order)
+    {
+        // Ensure only the seller can mark as received
+        if ($order->seller_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Update order status to "received"
+        $order->update([
+            'status' => 'received'
+        ]);
+
+        return redirect()->back()->with('success', 'Order marked as received.');
     }
 
 
@@ -331,7 +384,7 @@ class SellerController extends Controller
             ->get()
             ->keyBy('product_id');
 
-            $supplyDemand = [];
+        $supplyDemand = [];
 
         foreach ($productsWithLogs as $product) {
             $pid = $product->id;
@@ -384,6 +437,12 @@ class SellerController extends Controller
             ->get()
             ->keyBy('product_id');
 
+        // Sort and pick most/least selling
+        $sortedProducts = $topSelling->sortByDesc('total_sold');
+
+        $mostSelling = $sortedProducts->take(5); // top 5 products
+        $poorSelling = $sortedProducts->sortBy('total_sold')->take(5); // lowest 5 products
+
         // Combine results per product
         $averages = [];
         $highs = [];
@@ -423,6 +482,8 @@ class SellerController extends Controller
             'lows',
             'supplyDemand',
             'topSelling',
+            'mostSelling',
+            'poorSelling',
             'profitCostData',
             'monthlyData',
             'dailyData'
@@ -456,32 +517,19 @@ class SellerController extends Controller
     }
 
 
-
-
-
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function accept()
     {
-        //
+        $user = auth()->user();
+
+        // Update terms_accepted_at timestamp
+        $user->terms_accepted_at = now();
+        $user->save();
+
+        // Redirect back or to dashboard
+        return redirect()->route('seller.dashboard.index')
+            ->with('success', 'You have accepted the terms successfully.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+
 }

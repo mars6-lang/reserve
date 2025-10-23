@@ -121,6 +121,35 @@
                             </div>
                         </div>
 
+
+
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card shadow-sm border-0 rounded-3 bg-primary text-danger h-100">
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fas fa-exclamation-triangle fa-3x me-3 opacity-85"></i>
+                                            <div>
+                                                <h5 class="mb-1 fw-semibold">Product Reports</h5>
+                                                <small class="opacity-75">Pending reviews</small>
+                                            </div>
+                                        </div>
+                                        <h2 class="fw-bold display-5">{{ $reports ?? 0 }}</h2>
+
+                                        <div class="progress rounded-pill mt-3" style="height: 8px;">
+                                            <div class="progress-bar bg-light" role="progressbar" style="width: 40%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <a href="{{ route('admin.Apkindex') }}"
+                                        class="btn btn-sm btn-primary">
+                                        View Application
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </main>

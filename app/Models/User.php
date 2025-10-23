@@ -3,26 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\Users\replies;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Laravel\Jetstream\HasProfilePhoto; // ✅ ADD THIS
+use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use App\Models\Users\orders;
-use App\Models\Users\products;
-use App\Models\Profile;
+
+use App\Models\Users\Orders;
+use App\Models\Users\Products;
+use App\Models\Users\Replies;
 use App\Models\Users\MarketMonitoring;
-
-
+use App\Models\Profile;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-    use HasProfilePhoto;
-    use TwoFactorAuthenticatable;
-    use HasApiTokens, HasFactory, Notifiable, HasProfilePhoto;
+    use HasApiTokens, HasFactory, Notifiable, HasProfilePhoto, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -49,6 +45,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_seller' => 'boolean', // ✅ auto true/false instead of 0/1
+    ];
+
+    /**
+     * The attributes that should be appended to JSON.
+     */
+    protected $appends = [
+        'profile_photo_url',
     ];
 
     public function getProfilePhotoUrlAttribute()
@@ -58,17 +62,10 @@ class User extends Authenticatable
             : 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=0D8ABC&color=fff';
     }
 
-    /**
-     * The attributes that should be appended to JSON.
-     */
-    protected $appends = [
-        'profile_photo_url', // ✅ REQUIRED for Breeze photo display
-    ];
-
-    // Relationships
+    // ✅ Relationships
     public function roles()
     {
-        return $this->belongsToMany('App\Models\Role');
+        return $this->belongsToMany(Role::class);
     }
 
     public function hasAnyRoles($roles)
@@ -83,32 +80,27 @@ class User extends Authenticatable
 
     public function orders()
     {
-        return $this->hasMany(orders::class);
+        return $this->hasMany(Orders::class);
     }
 
     public function products()
     {
-        return $this->hasMany(products::class, 'user_id');
-    }
-
-    public function seller()
-    {
-        return $this->hasOne(Seller::class);
+        return $this->hasMany(Products::class, 'user_id');
     }
 
     public function reviewReplies()
     {
-        return $this->hasMany(replies::class);
+        return $this->hasMany(Replies::class);
     }
 
     public function ordersPlaced()
     {
-        return $this->hasMany(orders::class, 'user_id');
+        return $this->hasMany(Orders::class, 'user_id');
     }
 
     public function ordersReceived()
     {
-        return $this->hasMany(orders::class, 'seller_id');
+        return $this->hasMany(Orders::class, 'seller_id');
     }
 
     public function profile()
@@ -125,10 +117,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Chat::class, 'receiver_id');
     }
-    
 
     public function marketLogs()
     {
-        return $this->hasManyThrough(MarketMonitoring::class, products::class, 'user_id', 'product_id', 'id', 'id');
+        return $this->hasManyThrough(MarketMonitoring::class, Products::class, 'user_id', 'product_id', 'id', 'id');
     }
 }

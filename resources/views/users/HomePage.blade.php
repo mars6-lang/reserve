@@ -1,124 +1,194 @@
-@can('user-access')
-    @extends('layouts.Users.Homeapp')
+@extends('layouts.Users.Homeapp')
+@section('content')
+    <style>
+        /* Hero */
+        .amazon-hero {
+            height: 60vh;
+            background-size: cover;
+            background-color: #056659;
+            background-position: center;
+            width: 100%;
+            position: relative;
+            color: white;
+            padding: 0;
+        }
 
-    @section('content')
+        /* Product Cards */
+        .product-card {
+            border-radius: 10px;
+            transition: 0.3s;
+        }
 
-        <!DOCTYPE html>
-        <html lang="en">
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
 
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Home Page</title>
+        .btn-SearchBTN {
+            background-color: #08665bff;
+        }
 
-            <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-            <script src="{{ asset('js/app.js') }}" defer></script>
+        @media (max-width: 576px) {
+            .amazon-hero {
+                height: auto;
+                clip-path: none;
+            }
 
-            <!-- Font Awesome -->
-            <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+            .card-body {
+                padding: 0.75rem;
+            }
 
-            <!-- Bootstrap CSS -->
-            <link rel="stylesheet" href="{{ asset('build/bootstrap/bootstrap.v5.3.2.min.css') }}">
+            .container.py-1:last-of-type {
+                margin-bottom: 50px;
+            }
+        }
 
-            <style>
-                .bg-welcome {
-                    background-color: #87CEEB;
-                }
+        .recommended-train {
+            position: relative;
+            width: 100%;
+            overflow-x: hidden;
+        }
 
-                .hover-card {
-                    transition: transform 0.3s ease, box-shadow 0.3s ease;
-                }
+        .train-track {
+            display: flex;
+            gap: 0px;
+            animation: autoScroll 30s linear infinite;
+        }
 
-                .hover-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-                }
-            </style>
-        </head>
+        /* Smooth slide effect */
+        @keyframes autoScroll {
+            0% {
+                transform: translateX(0);
+            }
 
-        <body>
-            <!-- Welcome Header -->
-            <header class="bg-welcome text-white py-5 border-bottom d-flex align-items-center" style="height: 50vh;">
-                <div class="container text-center">
-                    <h1 class="display-4 fw-bold">Welcome, {{ Auth::user()->name }}</h1>
-                    <p class="lead mt-3">Empowering fishers and sellers with digital tools for smarter trading and insights.</p>
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .bg-darkNi {
+            background-color: #056659ff;
+        }
+
+        #feedbackCarousel .carousel-item {
+            height: 450px;
+            object-fit: cover;
+        }
+
+        .bg-mama-mo-green {
+            background-color: #056659ff;
+        }
+    </style>
+
+    <div class="">
+        {{-- Carousel Section --}}
+        @if(isset($carouselProducts) && $carouselProducts->count())
+            <div id="salesCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div class="carousel-inner rounded shadow-sm">
+                    @foreach($carouselProducts as $index => $product)
+                        @php
+                            $imgPath = $product->image ?? $product->photo ?? null;
+                            $imgUrl = $imgPath
+                                ? asset('storage/' . $imgPath)
+                                : 'https://via.placeholder.com/1200x300?text=' . urlencode($product->title ?? 'Product');
+                            $title = $product->title ?? 'Untitled';
+                            $totalSold = $product->orders_sum_quantity ?? 0;
+                            $avgRating = $product->reviews_avg_rating ?? 0;
+                        @endphp
+
+                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                            <a href="{{ route('users.prodsDetails', $product->id) }}" class="d-block">
+                                <img src="{{ $imgUrl }}" class="d-block w-100" id="sellsItems" alt="{{ $title }}">
+                                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-2">
+                                    <h5 class="mb-1">
+                                        {{ $title }}
+                                        @if($index < $bestSelling->count())
+                                            <span class="badge bg-success ms-2">Best Seller</span>
+                                        @else
+                                            <span class="badge bg-warning text-dark ms-2">Low Sales</span>
+                                        @endif
+                                    </h5>
+                                    <small>Sold: {{ $totalSold }} • ⭐ {{ number_format($avgRating, 1) }}</small>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
                 </div>
-            </header>
 
-            <!-- Features Section -->
-            <section class="py-5 bg-white">
-                <div class="container">
-                    <div
-                        class="row g-1 row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 text-center justify-content-center">
+                <button class="carousel-control-prev" type="button" data-bs-target="#salesCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#salesCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
 
-                        <div class="col-md-6">
-                            <a href="{{ route('users.dashboard.index') }}" class="text-decoration-none text-dark">
-                                <div class="card h-100 text-center border-0 shadow-sm rounded-3 Orders hover-card">
-                                    <div class="card-body py-4">
-                                        <i class="fas fa-table-columns fa-3x text-info mb-3"></i>
-                                        <h5 class="fw-semibold">Dashboard</h5>
-                                    </div>
-                                </div>
-                            </a>
+                <div class="carousel-indicators">
+                    @foreach($carouselProducts as $i => $p)
+                        <button type="button" data-bs-target="#salesCarousel" data-bs-slide-to="{{ $i }}"
+                            class="{{ $i === 0 ? 'active' : '' }}"></button>
+                    @endforeach
+                </div>
+            </div>
+        @else
+            {{-- Static fallback carousel --}}
+            <div id="feedbackCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div class="carousel-inner rounded shadow-sm">
+                    <div class="carousel-item active bg-mama-mo-green">
+                        <img src="#" class="d-block w-100 bg-mama-mo-green" alt="Welcome-Feedback">
+                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                            <h5>We Value Your Voice</h5>
+                            <p>Share your experience and help us improve our system.</p>
+                            <a href="{{ route('users.feedback.create') }}" class="btn btn-primary btn-sm">Leave Feedback</a>
                         </div>
-
-                        @if(auth()->user()->is_seller)
-                            <div class="col-md-6">
-                                <a href="{{ url('/seller/dashboard') }}" class="text-decoration-none text-dark">
-                                    <div class="card h-100 text-center border-0 shadow-sm rounded-3 Orders hover-card">
-                                        <div class="card-body py-4">
-                                            <i class="fas fa-user fa-3x text-info mb-3"></i>
-                                            <h5 class="fw-semibold">Seller Dashboard</h5>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        @else
-                            <div class="col-md-6">
-                                <a href="{{ route('users.registeraccount') }}" class="text-decoration-none text-dark">
-                                    <div class="card h-100 text-center border-0 shadow-sm rounded-3 Orders hover-card">
-                                        <div class="card-body py-4">
-                                            <i class="fas fa-user fa-3x text-info mb-3"></i>
-                                            <h5 class="fw-semibold">Register account</h5>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        @endif
-
-                        <div class="col-md-6">
-                            <a href="{{ route('profile.edit') }}" class="text-decoration-none text-dark">
-                                <div class="card h-100 text-center border-0 shadow-sm rounded-3 Orders hover-card">
-                                    <div class="card-body py-4">
-                                        <i class="fas fa-user fa-3x text-info mb-3"></i>
-                                        <h5 class="fw-semibold">Profile</h5>
-                                    </div>
-                                </div>
-                            </a>
+                    </div>
+                    <div class="carousel-item bg-mama-mo-green">
+                        <img src="#" class="d-block w-100" alt="Star Ratings">
+                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                            <h5>Quick Star Ratings</h5>
+                            <p>Rate your journey with just one click – from Poor ★ to Outstanding ★★★★★.</p>
                         </div>
-
-                        <div class="col-md-6">
-                            <a href="{{ route('chatroom.index') }}" class="text-decoration-none text-dark">
-                                <div class="card h-100 text-center border-0 shadow-sm rounded-3 Orders hover-card">
-                                    <div class="card-body py-4">
-                                        <i class="fas fa-comment fa-3x text-info mb-3"></i>
-                                        <h5 class="fw-semibold">My chats</h5>
-                                    </div>
-                                </div>
-                            </a>
+                    </div>
+                    <div class="carousel-item bg-mama-mo-green">
+                        <img src="#" class="d-block w-100" alt="Honest Feedback">
+                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                            <h5>Your Comments Matter</h5>
+                            <p>Tell us what’s working and what’s not – your words shape the system.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item bg-mama-mo-green">
+                        <img src="#" class="d-block w-100" alt="Transparency">
+                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                            <h5>We Listen. We Improve.</h5>
+                            <p>Your feedback drives real improvements across our platform.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item bg-mama-mo-green">
+                        <img src="#" class="d-block w-100" alt="Community Impact">
+                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                            <h5>Be Part of the Change</h5>
+                            <p>Join thousands of users making the system better every day.</p>
+                            <a href="{{ route('users.feedback.index') }}" class="btn btn-light btn-sm">See Feedbacks</a>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Saka -->
-            <footer class="bg-light py-4 text-center text-muted mt-5">
-                <small>&copy; {{ now()->year }} A Web-Based App — All rights reserved.</small>
-            </footer>
-        </body>
+                <button class="carousel-control-prev" type="button" data-bs-target="#feedbackCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#feedbackCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
 
-        </html>
-
-
-    @endsection
-@endcan
+                <div class="carousel-indicators">
+                    @for ($i = 0; $i < 5; $i++)
+                        <button type="button" data-bs-target="#feedbackCarousel" data-bs-slide-to="{{ $i }}"
+                            class="{{ $i === 0 ? 'active' : '' }}"></button>
+                    @endfor
+                </div>
+            </div>
+        @endif
+    </div>
+@endsection
