@@ -1,7 +1,0 @@
-{
-  "name": "laravelApp",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular-standalone"
-}

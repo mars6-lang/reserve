@@ -10,42 +10,18 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/favicon.ico') }}" />
 
-    <!-- Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
-    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- CSS (Bootstrap first, Tailwind last to take priority) -->
-    <link rel="stylesheet" href="{{ asset('build/bootstrap/bootstrap.v5.3.2.min.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @vite('resources/js/app.js')
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/alpinejs" defer></script>
-    <script src="//unpkg.com/alpinejs" defer></script>
-
-    <!-- details script -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <!-- them styles -->
-    <link href="{{ asset('css/styles.css') }}" rel="stylesheet" />
-
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
 
     <!-- Font Awesome -->
-    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- homepage bootystrap-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" />
+    <!-- Vite CSS & JS -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 
 
@@ -55,7 +31,7 @@
 
 <body class="font-sans antialiased bg-gray-100">
     <div class="min-h-screen">
-        @include('layouts.Admin.adminNav')
+    @include('layouts.partials.admin-navigation')
 
         <main>
             @yield('content')

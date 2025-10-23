@@ -7,53 +7,36 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Capstone') }}</title>
 
-    <!-- Vite (Tailwind + JS Build) -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <!-- Local Styles -->
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/favicon.ico') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Slab:wght@400;700&family=Manrope:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap CSS (for grid/layout classes) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Font Awesome & Bootstrap Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- AOS Animation -->
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
-    <style>
-        body {
-            font-family: 'Figtree', sans-serif;
-        }
-
-        .navbar,
-        .navbar-nav,
-        .nav-link {
-            font-family: 'Montserrat', sans-serif !important;
-        }
-    </style>
+    <!-- Vite CSS & JS (Tailwind overrides) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="font-sans antialiased bg-gray-100">
     <div class="min-h-screen">
-        {{-- Include navbar --}}
-        @include('layouts.Users.Homenav')
+    {{-- Include navbar (clean) --}}
+    @include('layouts.partials.home-navigation-clean')
 
         {{-- Main content --}}
-        <main>
+        <main style="margin-top: 0;">
             @yield('content')
         </main>
 
@@ -120,8 +103,6 @@
         {{-- Scripts --}}
         @stack('scripts')
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
