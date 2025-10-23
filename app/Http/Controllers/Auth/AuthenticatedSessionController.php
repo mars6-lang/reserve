@@ -29,6 +29,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Check if user is a seller and redirect to seller dashboard
+        if (auth()->user()->is_seller) {
+            return redirect()->intended(route('seller.dashboard.index'));
+        }
+
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 

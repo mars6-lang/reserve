@@ -6,17 +6,17 @@
 
     <div class="w-full min-h-screen bg-gray-200 py-6 px-3 sm:px-6">
         <div class="max-w-8xl mx-auto bg-white rounded-lg p-4 sm:p-8">
-            @if (session('success') === 'success')
+            @if (session('success'))
                 <div x-data="{ show: true }" x-show="show" x-transition.opacity.duration.1000ms
                     x-init="setTimeout(() => show = false, 3000)" class="text-center text-green-600 font-medium text-lg mb-6">
-                    Reservation sent!
+                    ✅ {{ session('success') }}
                 </div>
             @endif
 
-            @if (session('success') === 'Review submitted!')
+            @if (session('error'))
                 <div x-data="{ show: true }" x-show="show" x-transition.opacity.duration.1000ms
-                    x-init="setTimeout(() => show = false, 3000)" class="text-center text-green-600 font-medium text-lg mb-6">
-                    Review submitted!
+                    x-init="setTimeout(() => show = false, 3000)" class="text-center text-red-600 font-medium text-lg mb-6">
+                    ❌ {{ session('error') }}
                 </div>
             @endif
 
@@ -98,41 +98,32 @@
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" id="unitPrice" value="{{ $product->price }}">
 
+                            <!-- Quantity -->
                             <div class="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3">
-                                <!-- Quantity -->
                                 <div class="flex items-center gap-3">
                                     <label for="quantity" class="text-sm font-medium">Qty (kg):</label>
                                     <input type="number" name="quantity" id="quantity" min="1" class="form-control w-24"
                                         value="1" required />
                                 </div>
-
-                                <!-- Custom Price -->
-                                <div class="flex items-center gap-2">
-                                    <label for="custom_price" class="text-sm font-medium text-gray-700">Balor/Worth
-                                        (₱):</label>
-                                    <input type="number" name="custom_price" id="custom_price" class="form-control w-32"
-                                        placeholder="Or enter custom price" />
-                                </div>
                             </div>
 
-                            <!-- Payment & Reserve -->
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-6 justify-center">
-                                <div class="flex items-center gap-2">
-                                    <label for="payment_method" class="text-sm font-medium">Payment:</label>
-                                    <select name="payment_method" id="payment_method" required>
-                                        <option value="gcash">GCash</option>
-                                        <option value="cod">Cash on Pick-up</option>
-                                    </select>
-                                </div>
+                            <!-- Total Price Display -->
+                            <div class="bg-gray-100 p-4 rounded-lg border-2 border-gray-300">
+                                <p class="text-center text-lg font-bold text-gray-800">
+                                    Total Price: <span class="text-green-600">₱<span id="totalPrice">0.00</span></span>
+                                </p>
+                            </div>
 
+                            <!-- Reserve Button -->
+                            <div class="flex justify-center">
                                 @auth
                                     <button type="submit"
-                                        class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200">
+                                        class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200 font-semibold text-lg">
                                         Reserve
                                     </button>
                                 @else
                                     <a href="{{ route('login') }}"
-                                        class="w-full sm:w-auto block text-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
+                                        class="w-full sm:w-auto block text-center px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200 font-semibold text-lg"
                                         style="text-decoration: none;">
                                         Log in
                                     </a>
@@ -196,35 +187,67 @@
 
                     {{-- Leave Review --}}
                     @auth
-                        <div class="mt-8 border-t pt-4">
-                            <h5 class="text-lg font-semibold mb-4">Leave a Review</h5>
-                            <form action="{{ route('users.prodsDetails', $product->id) }}" method="POST"
-                                enctype="multipart/form-data" class="space-y-4">
-                                @csrf
+                        @php
+                            // Only count RECEIVED orders, not completed (completed = no longer active reservation)
+                            $hasReceivedOrder = \App\Models\Users\orders::where('user_id', auth()->id())
+                                ->where('product_id', $product->id)
+                                ->where('status', 'received')
+                                ->exists();
+                            
+                            $hasExistingReview = \App\Models\Users\reviewcomments::where('user_id', auth()->id())
+                                ->where('product_id', $product->id)
+                                ->exists();
+                            
+                            $canReview = $hasReceivedOrder && !$hasExistingReview;
+                        @endphp
 
-                                <div>
-                                    <label for="rating" class="form-label">Rating</label>
-                                    <select name="rating" id="rating" class="form-select" required>
-                                        <option value="">-Select Rating-</option>
-                                        @for($i = 5; $i >= 1; $i--)
-                                            <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
+                        @if ($canReview)
+                            <div class="mt-8 border-t pt-4">
+                                <h5 class="text-lg font-semibold mb-4">Leave a Review</h5>
+                                <form action="{{ route('users.prodsDetails', $product->id) }}" method="POST"
+                                    enctype="multipart/form-data" class="space-y-4">
+                                    @csrf
 
-                                <div>
-                                    <label for="comment" class="form-label">Comment</label>
-                                    <textarea name="comment" id="comment" rows="3" class="form-control" required></textarea>
-                                </div>
+                                    <div>
+                                        <label for="rating" class="form-label">Rating</label>
+                                        <select name="rating" id="rating" class="form-select" required>
+                                            <option value="">-Select Rating-</option>
+                                            @for($i = 5; $i >= 1; $i--)
+                                                <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
 
-                                <div>
-                                    <label for="photo" class="form-label">Upload a Photo (optional)</label>
-                                    <input type="file" name="photo" id="photo" class="form-control" accept="image/*">
-                                </div>
+                                    <div>
+                                        <label for="comment" class="form-label">Comment</label>
+                                        <textarea name="comment" id="comment" rows="3" class="form-control" required></textarea>
+                                    </div>
 
-                                <button type="submit" class="btn btn-info">Submit Review</button>
-                            </form>
-                        </div>
+                                    <div>
+                                        <label for="photo" class="form-label">Upload a Photo (optional)</label>
+                                        <input type="file" name="photo" id="photo" class="form-control" accept="image/*">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-info">Submit Review</button>
+                                </form>
+                            </div>
+                        @else
+                            <div class="mt-8 border-t pt-4">
+                                @if ($hasExistingReview)
+                                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                                        <p class="text-green-800 font-medium">
+                                            ✅ Thank you! You have already reviewed this product. One review per product per buyer.
+                                        </p>
+                                    </div>
+                                @else
+                                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                                        <p class="text-yellow-800 font-medium">
+                                            📦 You can leave a review after you have received your reserved product.
+                                        </p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
                     @else
                         <div class="d-flex justify-center">
                             <strong>
@@ -244,46 +267,20 @@
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const quantityInput = document.getElementById('quantity');
-                const customPriceInput = document.getElementById('custom_price');
                 const totalPriceEl = document.getElementById('totalPrice');
                 const unitPrice = parseFloat(document.getElementById('unitPrice').value);
 
                 function updateTotal() {
-                    const qty = parseFloat(quantityInput.value) || 0;
-                    const customPrice = parseFloat(customPriceInput.value) || 0;
-                    let total = 0;
-
-                    if (customPrice > 0) {
-                        total = customPrice;
-                    } else if (qty > 0) {
-                        total = unitPrice * qty;
-                    } else {
-                        total = unitPrice;
-                    }
-
+                    const qty = parseFloat(quantityInput.value) || 1;
+                    const total = unitPrice * qty;
                     totalPriceEl.textContent = total.toFixed(2);
-                }
-
-                function toggleInputs() {
-                    const customPrice = parseFloat(customPriceInput.value) || 0;
-                    const qty = parseFloat(quantityInput.value) || 0;
-
-                    quantityInput.disabled = customPrice > 0;
-                    customPriceInput.disabled = qty > 0;
                 }
 
                 quantityInput.addEventListener('input', () => {
                     updateTotal();
-                    toggleInputs();
-                });
-
-                customPriceInput.addEventListener('input', () => {
-                    updateTotal();
-                    toggleInputs();
                 });
 
                 updateTotal();
-                toggleInputs();
             });
         </script>
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use DB;
 use App\Models\Users\reportprods;
+use App\Models\Users\SellerApplication;
 class adminDashboardController extends Controller
 {
     /**
@@ -13,13 +14,13 @@ class adminDashboardController extends Controller
      */
     public function index()
     {
-        $userLoginCount = User::where('last_login_at', '>=', now()->subDay())->count();
+        // Total users - ALL users in the system
+        $userLoginCount = User::all()->count();
 
-        $feedbackCount = DB::table('feedbacks')->count();
+        // Seller applications - ALL applications
+        $sellerApps = SellerApplication::where('status', 'pending')->count();
 
-        $reports = reportprods::count();
-
-        return view('admin.dashboard', compact('userLoginCount', 'feedbackCount', 'reports'));
+        return view('admin.dashboard', compact('userLoginCount', 'sellerApps'));
     }
 
 

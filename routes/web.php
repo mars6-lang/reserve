@@ -23,8 +23,9 @@ use App\Http\Controllers\NotificationController;
 
 // route for the landing page 
 Route::get('/', function () {
+    // Show home page for all users (guests and authenticated)
     return view('Home');
-});
+})->name('home');
 
 
 
@@ -35,7 +36,7 @@ Route::get('/dashboard', function () {
         $role = $user->roles[0]->name ?? 'user';
 
         if ($role === 'admin') {
-            return view('admin.dashboard');
+            return app('App\Http\Controllers\Admin\adminDashboardController')->index();
         } elseif ($user->is_seller) {
             // redirect to SellerController@index
             return redirect()->route('seller.dashboard.index');
@@ -88,8 +89,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // admin routes here 
-Route::
-        namespace('App\Http\Controllers\Admin')->prefix('admin')->name('admin.')->middleware('can:admin-access')->group(function () {
+Route::namespace('App\Http\Controllers\Admin')->prefix('admin')->name('admin.')->middleware('can:admin-access')->group(function () {
 
             // add routes here for admin 
             Route::resource('/users', 'UserController', ['except' => ['create', 'store', 'destroy']]);
@@ -132,8 +132,7 @@ Route::
 
 
 // users routes here 
-Route::
-        namespace('App\Http\Controllers\Users')->prefix('users')->name('users.')->middleware('can:user-access')->group(function () {
+Route::namespace('App\Http\Controllers\Users')->prefix('users')->name('users.')->middleware('can:user-access')->group(function () {
 
             // add routes here for users 
             Route::resource('/feedback', 'CTRLFeedbacks', ['except' => ['update', 'edit', 'destroy']]);
@@ -153,7 +152,7 @@ Route::
 
 
             //register account to seller 
-            Route::get('/registeraccount', 'DashboardController@registeraccount')->name('registeraccount');
+            Route::get('/registeraccount', 'DashboardController@registeraccount')->name('registeraccount')->middleware('auth');
 
             Route::get('/addprods', function () {
                 return view('users.addproduct.create');
@@ -162,13 +161,14 @@ Route::
             });
 
             Route::post('/registeraccount', 'SellerApplicationController@store')
-                ->name('registeraccount')
+                ->name('registeraccount.store')
                 ->middleware('auth');
 
 
             // User places an order
             Route::post('/order', 'orderController@prodsDetailsStore')->name('order');
             Route::get('/myOrders', 'prodsDetailsCRTL@myOrders')->name('myOrders');
+            Route::get('/reservations/track', 'prodsDetailsCRTL@trackReservations')->name('reservations.track');
             Route::patch('/cancelorders/{order}', 'orderController@cancel')->name('orders.cancel');
             Route::patch('/orders/{order}/received', 'orderController@markReceived')->name('orders.markReceived');
             //repor

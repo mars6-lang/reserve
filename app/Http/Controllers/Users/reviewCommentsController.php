@@ -17,12 +17,31 @@ class reviewCommentsController extends Controller
 
     public function store(Request $request, $id) // $id = product ID
     {
+        $product = \App\Models\Users\products::findOrFail($id);
+
+        // Check if user has ALREADY reviewed this product
+        $existingReview = \App\Models\Users\reviewcomments::where('user_id', auth()->id())
+            ->where('product_id', $id)
+            ->first();
+
+        if ($existingReview) {
+            return back()->with('error', 'You have already reviewed this product. One review per product per buyer.');
+        }
+
+        // Check if user has RECEIVED order for this product (not completed - completed = no longer active reservation)
+        $hasReceivedOrder = \App\Models\Users\orders::where('user_id', auth()->id())
+            ->where('product_id', $id)
+            ->where('status', 'received')
+            ->exists();
+
+        if (!$hasReceivedOrder) {
+            return back()->with('error', 'You can only leave a review while the product is in RECEIVED status.');
+        }
+
         $request->validate([
             'comment' => 'required|string|max:255',
             'rating' => 'required|numeric|min:1|max:5',
         ]);
-
-        $product = \App\Models\Users\products::findOrFail($id); // use $id here
 
         $review = \App\Models\Users\reviewcomments::create([
             'user_id' => auth()->id(),

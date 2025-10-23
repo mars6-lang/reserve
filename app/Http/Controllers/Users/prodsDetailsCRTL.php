@@ -34,6 +34,33 @@ class prodsDetailsCRTL extends Controller
         return view('users.myOrders.myOrders', compact('orders'));
     }
 
+    /**
+     * Track all reservations with status summary
+     */
+    public function trackReservations(Request $request)
+    {
+        $status = $request->get('status', null);
+        
+        $query = orders::with('product', 'seller')
+            ->where('user_id', auth()->id())
+            ->whereHas('product');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $orders = $query->latest()->get();
+
+        // Get status summary
+        $summary = orders::where('user_id', auth()->id())
+            ->selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
+        return view('users.myOrders.trackReservations', compact('orders', 'summary', 'status'));
+    }
+
 
 
     public function ProdsReport($id)

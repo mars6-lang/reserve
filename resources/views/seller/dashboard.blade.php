@@ -162,23 +162,6 @@
                         </a>
                     </div>
 
-                    <!-- Market Analysis -->
-                    <div class="col text-icons">
-                        <a href="{{ route('seller.analysis.marketanalysis') }}" class="text-decoration-none text-dark">
-                            <div class="card h-100 text-center shadow-sm border-0 hover-shadow">
-                                <div class="card-body p-3">
-                                    <!-- Chart Icon -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9 mb-2 text-icons mx-auto" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 17v-6m4 6V7m4 10V3" />
-                                    </svg>
-                                    <h6 class="fw-bold mb-1">Market analysis</h6>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
                     <!-- Notifications -->
                     <div class="col text-icons">
                         <a href="{{ route('notifications.index') }}" class="text-decoration-none text-dark">

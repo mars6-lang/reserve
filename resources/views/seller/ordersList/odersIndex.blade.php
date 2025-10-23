@@ -93,22 +93,9 @@
                             </p>
                         @endif
 
-                        @if ($order->custom_price)
-                            <p class="text-sm text-red-600 font-medium">
-                                Buyer's Requested Balor/Worth: ₱{{ number_format($order->custom_price, 2) }}
-                            </p>
-                        @endif
-
                         <p class="text-sm text-gray-700">
                             <span class="font-medium">Total Price:</span>
                             ₱{{ number_format($order->total_price, 2) }}
-                        </p>
-
-                        <p class="text-sm text-gray-700">
-                            <span class="font-medium">Payment Method:</span>
-                            <span class="inline-block bg-gray-100 text-gray-700 rounded px-2 py-0.5 text-xs capitalize">
-                                {{ str_replace('_', ' ', $order->payment_method) }}
-                            </span>
                         </p>
 
                         <div class="text-sm mt-2">

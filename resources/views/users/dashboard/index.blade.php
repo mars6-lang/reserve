@@ -70,7 +70,7 @@
 
                     <!-- Reserved Products -->
                     <div class="col">
-                        <a href="{{ route('users.myOrders') }}" class="text-decoration-none text-dark">
+                        <a href="{{ route('users.reservations.track') }}" class="text-decoration-none text-dark">
                             <div class="card h-100 text-center shadow-sm border-0 hover-shadow">
                                 <div class="card-body p-3">
                                     <!-- Box Icon -->
@@ -79,7 +79,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4" />
                                     </svg>
-                                    <h6 class="fw-bold mb-1">Reserved Products</h6>
+                                    <h6 class="fw-bold mb-1">Track Reservations</h6>
                                     
                                 </div>
                             </div>

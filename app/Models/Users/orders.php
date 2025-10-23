@@ -16,7 +16,6 @@ class orders extends Model
         'quantity',
         'custom_price',
         'total_price',
-        'payment_method',
         'status',
     ];
 

@@ -38,6 +38,33 @@
             min-width: 110px;
         }
     }
+    /* Cart icon badge */
+    .cart-badge {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        background-color: #dc2626;
+        color: white;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-left: 0.25rem;
+    }
+    .cart-icon-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        cursor: pointer;
+        color: #064e3b;
+        text-decoration: none;
+        position: relative;
+    }
+    .cart-icon-link:hover {
+        text-decoration: underline;
+    }
 </style>
 
 <header class="site-header">
@@ -47,11 +74,32 @@
             <div style="display: flex; justify-content: flex-end; align-items: center; height: 2.5rem; font-size: 0.875rem; gap: 1rem;">
                 @auth
                     @php $user = Auth::user(); @endphp
+                    
+                    {{-- Reservations Cart Icon --}}
+                    @if (!$user->is_seller)
+                        @php
+                            $reservationCount = \App\Models\Users\orders::where('user_id', $user->id)->count();
+                        @endphp
+                        <a href="{{ route('users.reservations.track') }}" class="cart-icon-link" title="View all reservations">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" style="width: 1.25rem; height: 1.25rem;">
+                                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 6H6.28l-.31-1.243A1 1 0 005 4H3z" />
+                                <path d="M16 16a2 2 0 11-4 0 2 2 0 014 0zM4 12a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            @if ($reservationCount > 0)
+                                <span class="cart-badge">{{ $reservationCount }}</span>
+                            @endif
+                        </a>
+                    @endif
+                    
                     @if ($user->is_seller)
                         <a href="{{ route('seller.dashboard.index') }}" style="color: #064e3b;">Seller Dashboard</a>
                     @else
                         <a href="{{ route('users.registeraccount') }}" style="color: #064e3b;">Register as Seller</a>
                     @endif
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" style="background: none; border: none; color: #064e3b; cursor: pointer; text-decoration: none; font-size: 0.875rem;">Log Out</button>
+                    </form>
                 @else
                     <a href="{{ route('login') }}" style="color: #064e3b;">Log In</a>
                     <a href="{{ route('register') }}" style="color: #064e3b; font-weight: 600;">Register</a>
@@ -66,12 +114,12 @@
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0;">
                 <!-- Brand -->
                 <div class="the-loko">
-                    <a href="{{ route('users.HomePage.index') }}" class="brand" style="color: #064e3b; text-decoration: none;">Aparri Fish Market</a>
+                    <a href="{{ route('home') }}" class="brand" style="color: #064e3b; text-decoration: none;">Aparri Fish Market</a>
                 </div>
 
                 <!-- Desktop nav links -->
                 <div style="display: none; gap: 1.5rem; align-items: center; font-size: 1rem; font-weight: 500;" class="desktop-nav">
-                    <a href="{{ route('users.HomePage.index') }}" style="color: #064e3b; padding: 0.5rem 0.75rem; border-radius: 0.375rem;">Home</a>
+                    <a href="{{ route('home') }}" style="color: #064e3b; padding: 0.5rem 0.75rem; border-radius: 0.375rem;">Home</a>
                     <a href="{{ route('users.Market.index') }}" style="color: #064e3b; padding: 0.5rem 0.75rem; border-radius: 0.375rem;">Market</a>
                 </div>
 

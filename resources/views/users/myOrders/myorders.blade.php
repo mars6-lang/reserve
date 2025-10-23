@@ -26,22 +26,9 @@
                                 kilo{{ $order->quantity > 1 ? 's' : '' }}
                             </p>
 
-                            @if ($order->custom_price)
-                                <p class="text-sm text-red-600 font-medium">
-                                    Your Offered Price: ₱{{ number_format($order->custom_price, 2) }}
-                                </p>
-                            @endif
-
                             <p class="text-sm text-gray-700">
                                 <span class="font-medium">Total Price:</span>
                                 ₱{{ number_format($order->total_price, 2) }}
-                            </p>
-
-                            <p class="text-sm text-gray-700">
-                                <span class="font-medium">Payment Method:</span>
-                                <span class="inline-block bg-gray-100 text-gray-700 rounded px-2 py-0.5 text-xs capitalize">
-                                    {{ str_replace('_', ' ', $order->payment_method) }}
-                                </span>
                             </p>
 
                             <span class="text-xs text-gray-500">{{ $order->created_at->format('M d, Y g:i A') }}</span>

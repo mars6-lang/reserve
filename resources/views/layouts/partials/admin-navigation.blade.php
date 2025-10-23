@@ -1,101 +1,359 @@
 <style>
-    .hover-bg:hover {
-        background-color: rgb(157, 227, 255);
-        /* Light gray, adjust as needed */
+    .admin-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(180deg, #069c88 0%, #047a6b 50%, #056659 100%);
+        z-index: 1000;
+        overflow-y: auto;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .admin-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .admin-sidebar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .admin-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    .admin-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .admin-topbar {
+        position: fixed;
+        top: 0;
+        left: 280px;
+        right: 0;
+        height: 70px;
+        background: linear-gradient(90deg, #ffffff 0%, #fafafa 100%);
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        padding: 0 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    }
+
+    .admin-content {
+        margin-left: 280px;
+        margin-top: 70px;
+        padding: 30px;
+        min-height: calc(100vh - 70px);
+        background: linear-gradient(135deg, #f8fffe 0%, #f0f9f7 100%);
+    }
+
+    .sidebar-header {
+        padding: 24px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        color: white;
+        text-align: center;
+    }
+
+    .sidebar-header .logo {
+        width: 65px;
+        height: 65px;
+        border-radius: 12px;
+        margin: 0 auto 12px;
+        display: block;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-header .logo:hover {
+        transform: scale(1.05);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .sidebar-header h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .sidebar-header p {
+        margin: 6px 0 0 0;
+        font-size: 0.8rem;
+        opacity: 0.85;
+        font-weight: 500;
+    }
+
+    .sidebar-menu {
+        padding: 20px 0;
+    }
+
+    .sidebar-menu a,
+    .sidebar-menu button {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 20px;
+        color: rgba(255, 255, 255, 0.75);
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        background: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        font-weight: 500;
+        position: relative;
+    }
+
+    .sidebar-menu a::before,
+    .sidebar-menu button::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        transform: scaleY(0);
+        transform-origin: center;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-menu a:hover,
+    .sidebar-menu button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        padding-left: 26px;
+    }
+
+    .sidebar-menu a:hover::before,
+    .sidebar-menu button:hover::before {
+        transform: scaleY(1);
+    }
+
+    .sidebar-menu a.active {
+        background: rgba(255, 255, 255, 0.18);
+        color: white;
+        border-left: 3px solid white;
+        padding-left: 17px;
+    }
+
+    .sidebar-menu a.active::before {
+        transform: scaleY(1);
+    }
+
+    .sidebar-menu i {
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .topbar-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #056659;
+        letter-spacing: 0.2px;
+    }
+
+    .topbar-title i {
+        margin-right: 8px;
+        color: #069c88;
+    }
+
+    .topbar-user {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #069c88;
+        box-shadow: 0 2px 8px rgba(6, 156, 136, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .user-avatar:hover {
+        transform: scale(1.05);
+        border-color: #056659;
+        box-shadow: 0 4px 12px rgba(6, 156, 136, 0.3);
+    }
+
+    .topbar-user span {
+        font-weight: 600;
+        color: #056659;
+    }
+
+    /* Table Styling */
+    .admin-content table {
+        width: 100%;
+        margin: 0;
+        background: white;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .admin-content table thead {
+        background: linear-gradient(135deg, #069c88 0%, #056659 100%);
+        color: white;
+    }
+
+    .admin-content table thead th {
+        padding: 16px;
+        font-weight: 700;
+        text-align: left;
+        border: none;
+        font-size: 0.95rem;
+        letter-spacing: 0.3px;
+    }
+
+    .admin-content table tbody tr {
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+    }
+
+    .admin-content table tbody tr:hover {
+        background: #f8fffe;
+    }
+
+    .admin-content table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .admin-content table tbody td {
+        padding: 14px 16px;
+        border: none;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+    .admin-content table tbody td a {
+        color: #069c88;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .admin-content table tbody td a:hover {
+        color: #056659;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .admin-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            width: 250px;
+        }
+
+        .admin-sidebar.active {
+            transform: translateX(0);
+        }
+
+        .admin-topbar {
+            left: 0;
+        }
+
+        .admin-content {
+            margin-left: 0;
+        }
+
+        .admin-content table {
+            font-size: 0.85rem;
+        }
+
+        .admin-content table thead th,
+        .admin-content table tbody td {
+            padding: 10px 12px;
+        }
     }
 </style>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<nav x-data="{ sidebarOpen: false, dropdownOpen: false }" class="top-0 left-0 w-full border-b border-gray-100 py-3">
-    <div class="max-w-7xl mx-auto px-4 sm:px-1 lg:px-8">
-        <div class="flex justify-between items-center">
+<!-- Top Bar -->
+<div class="admin-topbar">
+    <button id="sidebarToggle" class="md:hidden text-2xl text-gray-700 mr-5">
+        <i class="fas fa-bars"></i>
+    </button>
+    <h1 class="topbar-title">
+        <i class="fas fa-store"></i> Aparri Fish Market
+    </h1>
+    <div class="topbar-user">
+        @auth
+            <span class="text-sm">{{ Auth::user()->name }}</span>
+            <img src="{{ Auth::user()->profile_photo_url ?? 'https://via.placeholder.com/40' }}" 
+                 alt="Profile" class="user-avatar">
+        @endauth
+    </div>
+</div>
 
-            <!-- Logo -->
-            <div class="flex-shrink-0 flex items-center">
-                <a href="">
-                    <img src="{{ asset('images/loko.jpg') }}" alt="Logo"
-                        class="w-14 h-auto rounded-full object-cover" />
-                </a>
-            </div>
-
-            <!-- Center Nav Links -->
-            <div>
-                <span>ADMIN DASHBOARD</span>
-            </div>
-
-            <!-- Sidebar Toggle Button -->
-            <div class="flex items-center">
-                <button @click="sidebarOpen = true"
-                    class="p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
-        </div>
+<!-- Sidebar -->
+<aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+        <img src="{{ asset('images/loko.jpg') }}" alt="Logo" class="logo">
+        <h3>Admin Panel</h3>
+        <p>{{ Auth::user()?->name ?? 'Administrator' }}</p>
     </div>
 
-    @php
-        $user = Auth::user();
-    @endphp
+    <nav class="sidebar-menu">
+        <a href="{{ route('dashboard') }}" class="@if(Route::is('dashboard')) active @endif">
+            <i class="fas fa-chart-bar"></i>
+            <span>Dashboard</span>
+        </a>
+        
+        <a href="{{ route('admin.users.index') }}">
+            <i class="fas fa-user-tie"></i>
+            <span>Manage Users</span>
+        </a>
 
-    <!-- Sidebar Panel -->
-    <aside x-show="sidebarOpen" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="translate-x-full"
-        class="fixed right-0 top-0 h-full w-64 bg-white shadow-xl z-50 px-6 py-8 space-y-4" style="display: none;">
+        <a href="{{ route('admin.Apkindex') }}">
+            <i class="fas fa-handshake"></i>
+            <span>Seller Applications</span>
+        </a>
 
-        <!-- Sidebar Header -->
-        <div class="flex items-center justify-between px-4 pt-4 pb-2">
-            <button @click="sidebarOpen = false" class="text-3xl text-gray-600 hover:text-red-500 focus:outline-none">
-                &times;
+        <hr style="border: 1px solid rgba(255, 255, 255, 0.1); margin: 15px 0;">
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit">
+                <i class="fas fa-door-open"></i>
+                <span>Log Out</span>
             </button>
-            <h5 class="text-lg font-semibold text-gray-800">Menu</h5>
-        </div>
+        </form>
+    </nav>
+</aside>
 
-        <!-- Profile Info Section -->
-        <div class="max-w-md mx-auto p-4 sm:p-6 bg-white">
-            <div class="flex items-center gap-4">
-                <!-- Profile Picture -->
-                <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}'s Photo"
-                    class="w-16 h-16 rounded-full object-cover border border-gray-300 shadow-sm aspect-square ring-2 ring-blue-500">
+<!-- Main Content Wrapper -->
+<div class="admin-content" id="adminContent">
+</div>
 
-                <!-- Name & Role -->
-                <div class="flex flex-col justify-center">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ $user->name }}</h2>
+<script>
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const adminSidebar = document.getElementById('adminSidebar');
 
-                    @if ($user->is_seller)
-                        <span
-                            class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full w-fit">
-                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Verified Seller
-                        </span>
-                    @else
-                        <span class="mt-1 text-sm text-gray-500 italic">admin</span>
-                    @endif
-                </div>
-            </div>
-        </div>
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            adminSidebar.classList.toggle('active');
+        });
 
-        <hr class="border-t border-gray-800 mt-1">
-
-        <!-- Navigation Links -->
-        <nav class="flex flex-col space-y-5 text-lg text-gray-700 mt-5">
-            <a href="{{ route('dashboard') }}" class="nav-link px-3 py-2 rounded hover:bg-gray-100">Home</a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                    class="text-left text-red-500 px-3 py-2 rounded hover:bg-red-100 hover:text-red-700 w-full">
-                    Log Out
-                </button>
-            </form>
-        </nav>
-    </aside>
-    @yield('scripts')
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', function() {
+                adminSidebar.classList.remove('active');
+            });
+        });
+    }
+</script>
 </nav>

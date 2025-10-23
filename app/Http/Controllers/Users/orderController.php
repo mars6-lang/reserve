@@ -33,35 +33,25 @@ class orderController extends Controller
         $product = products::findOrFail($request->product_id);
 
         $request->validate([
-            'quantity' => 'nullable|numeric|min:0',
-            'custom_price' => 'nullable|numeric|min:0',
-            'payment_method' => 'required|in:gcash,cod',
+            'quantity' => 'required|numeric|min:1',
         ]);
 
-        $quantityInput = $request->input('quantity');
-        $customInput = $request->input('custom_price');
-
-        $isCustom = $customInput > 0;
-        $quantity = $isCustom ? 0 : ($quantityInput ?? 0);
-        $customPrice = $isCustom ? $customInput : 0;
+        $quantity = $request->input('quantity');
 
         $discountedPrice = $product->discount_percent
             ? $product->price * (1 - $product->discount_percent / 100)
             : $product->price;
 
-        $totalPrice = $isCustom
-            ? $customPrice
-            : $discountedPrice * $quantity;
+        $totalPrice = $discountedPrice * $quantity;
 
         // Create order
         $order = orders::create([
             'product_id' => $product->id,
             'quantity' => $quantity,
-            'custom_price' => $customPrice,
+            'custom_price' => 0,
             'user_id' => auth()->id(),
             'seller_id' => $product->user_id,
             'total_price' => $totalPrice,
-            'payment_method' => $request->payment_method,
             'status' => 'active',
         ]);
 
