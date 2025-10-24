@@ -57,7 +57,6 @@
                                                 </div>
                                                 <div class="flex-1 min-w-0">
                                                     <p class="text-sm font-bold text-gray-900 truncate">{{ $product->title }}</p>
-                                                    <p class="text-xs text-gray-500 mt-1">ID: {{ $product->id }}</p>
                                                 </div>
                                             </div>
                                         </td>

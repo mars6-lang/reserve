@@ -178,24 +178,45 @@
 
                 <!-- Mobile hamburger -->
                 <div style="display: none;" class="mobile-menu">
-                    <button style="padding: 0.5rem; border-radius: 0.375rem; background: none; border: none; cursor: pointer;">
+                    <button id="mobileNavToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNavPanel" style="padding: 0.5rem; border-radius: 0.375rem; background: none; border: none; cursor: pointer;">
                         <svg class="h-6 w-6" style="width: 1.5rem; height: 1.5rem; color: #374151;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
                 </div>
             </div>
         </div>
     </nav>
+    <!-- Mobile nav panel -->
+    <div id="mobileNavPanel" class="mobile-nav-panel" style="display: none; border-top: 1px solid #e5e7eb; background-color: #ffffff;">
+        <div style="max-width: 80rem; margin: 0 auto; padding: 0 1.5rem;">
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0; font-size: 1rem; font-weight: 500;">
+                <a href="{{ route('home') }}" style="color: #064e3b; padding: 0.5rem 0.75rem; border-radius: 0.375rem; text-decoration: none;">Home</a>
+                @if (!auth()->check() || !auth()->user()->is_seller)
+                    <a href="{{ route('users.Market.index') }}" style="color: #064e3b; padding: 0.5rem 0.75rem; border-radius: 0.375rem; text-decoration: none;">Market</a>
+                @endif
+            </div>
+        </div>
+    </div>
 </header>
 
 <script>
     // Show desktop nav on medium+ screens
     const desktopNav = document.querySelector('.desktop-nav');
     const mobileMenu = document.querySelector('.mobile-menu');
+    const mobilePanel = document.getElementById('mobileNavPanel');
+    const mobileToggleBtn = document.getElementById('mobileNavToggle');
     
     function updateNav() {
         if (window.innerWidth >= 768) {
             desktopNav.style.display = 'flex';
             mobileMenu.style.display = 'none';
+            // Ensure mobile panel is closed when switching to desktop
+            if (mobilePanel) {
+                mobilePanel.style.display = 'none';
+                mobilePanel.dataset.open = 'false';
+            }
+            if (mobileToggleBtn) {
+                mobileToggleBtn.setAttribute('aria-expanded', 'false');
+            }
         } else {
             desktopNav.style.display = 'none';
             mobileMenu.style.display = 'block';
@@ -205,4 +226,47 @@
     // Initial check and on resize
     updateNav();
     window.addEventListener('resize', updateNav);
+
+    // Mobile menu toggle
+    if (mobileToggleBtn && mobilePanel) {
+        const closeMobilePanel = () => {
+            mobilePanel.style.display = 'none';
+            mobilePanel.dataset.open = 'false';
+            mobileToggleBtn.setAttribute('aria-expanded', 'false');
+        };
+
+        const openMobilePanel = () => {
+            mobilePanel.style.display = 'block';
+            mobilePanel.dataset.open = 'true';
+            mobileToggleBtn.setAttribute('aria-expanded', 'true');
+        };
+
+        mobileToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = mobilePanel.dataset.open === 'true';
+            if (isOpen) {
+                closeMobilePanel();
+            } else {
+                openMobilePanel();
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            const isOpen = mobilePanel.dataset.open === 'true';
+            if (!isOpen) return;
+            const clickedInsidePanel = mobilePanel.contains(e.target);
+            const clickedToggle = mobileToggleBtn.contains(e.target);
+            if (!clickedInsidePanel && !clickedToggle) {
+                closeMobilePanel();
+            }
+        });
+
+        // Close with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobilePanel();
+            }
+        });
+    }
 </script>

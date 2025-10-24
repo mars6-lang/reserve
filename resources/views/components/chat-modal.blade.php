@@ -12,8 +12,8 @@
 
             <!-- Modal Body -->
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <div id="chatsList" class="chat-list">
-                    <div class="text-center py-5">
+                <div id="chatsList" class="ch5at-list">
+                    <div class="text-center py-">
                         <div class="spinner-border text-primary" role="status" style="color: #069c88 !important;">
                             <span class="visually-hidden">Loading...</span>
                         </div>

@@ -29,7 +29,7 @@
 
                         <div class="mb-3">
                             <label for="description" class="form-label">Edit description</label>
-                            <input type="text" name="description" id="description" class="form-control" required
+                            <input type="text" name="description" id="description" class="form-control"
                                 value="{{ old('description', $product->description) }}">
                         </div>
 
@@ -40,7 +40,7 @@
                                 value="{{ old('price', $product->price) }}">
                         </div>
 
-                        <!-- Discount Section -->
+                        {{-- <!-- Discount Section -->
                         <div class="mb-4 p-3 bg-light rounded border">
                             <h5 class="fw-semibold mb-2">Optional: Discount</h5>
 
@@ -52,7 +52,7 @@
                                     placeholder="Enter discount percent (0 to remove)">
                             </div>
                             <small class="text-muted">Set to 0 if no discount is needed.</small>
-                        </div>
+                        </div> --}}
 
                         <!-- Product Image -->
                         <div class="mb-4">
