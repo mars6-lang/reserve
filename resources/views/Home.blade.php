@@ -202,6 +202,7 @@
     .carousel-slide {
         display: none;
         width: 100%;
+        position: relative;
     }
 
     .carousel-slide.active {
@@ -213,6 +214,49 @@
         height: 450px;
         object-fit: cover;
         border-radius: 12px;
+    }
+
+    /* CTA overlay on slides */
+    .carousel-caption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 20px 24px;
+        background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.75) 100%);
+        color: #fff;
+        border-radius: 0 0 12px 12px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
+    .carousel-caption-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        margin-right: auto;
+    }
+
+    .btn-cta {
+        padding: 10px 18px;
+        background: #069c88;
+        color: #fff;
+        border: 2px solid #069c88;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 4px 14px rgba(6, 156, 136, 0.35);
+        white-space: nowrap;
+    }
+
+    .btn-cta:hover {
+        background: #056659;
+        border-color: #056659;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(5, 102, 89, 0.45);
     }
 
     .carousel-controls {
@@ -385,6 +429,20 @@
             height: 300px;
         }
 
+        .carousel-caption {
+            padding: 14px 16px;
+            gap: 8px;
+        }
+
+        .carousel-caption-title {
+            font-size: 1rem;
+        }
+
+        .btn-cta {
+            padding: 8px 14px;
+            font-size: 0.9rem;
+        }
+
         .why-grid {
             grid-template-columns: 1fr;
             gap: 30px;
@@ -444,21 +502,41 @@
             @forelse ($products as $product)
                 <div class="carousel-slide @if($loop->first)active @endif">
                     <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}" title="{{ $product->title }}">
+                    <div class="carousel-caption" aria-label="Product slide caption">
+                        <div class="carousel-caption-title">{{ $product->title }}</div>
+                        <a href="{{ route('users.prodsDetails', $product->id) }}" class="btn-cta" aria-label="View details for {{ $product->title }}">View details</a>
+                    </div>
                 </div>
             @empty
                 {{-- Fallback to static images if no products available --}}
                 <div class="carousel-slide active">
                     <img src="{{ asset('images/pexels-mali-229789.jpg') }}" alt="Fresh Seafood">
+                    <div class="carousel-caption">
+                        <div class="carousel-caption-title">Fresh catches daily</div>
+                        <a href="{{ route('users.Market.index') }}" class="btn-cta">Browse market</a>
+                    </div>
                 </div>
                 <div class="carousel-slide">
                     <img src="{{ asset('images/pexels-kindelmedia-8351639.jpg') }}" alt="Fish Market">
+                    <div class="carousel-caption">
+                        <div class="carousel-caption-title">Trusted local sellers</div>
+                        <a href="{{ route('users.Market.index') }}" class="btn-cta">Shop now</a>
+                    </div>
                 </div>
                 <div class="carousel-slide">
                     <img src="{{ asset('images/pexels-pixabay-61153.jpg') }}" alt="Seafood">
+                    <div class="carousel-caption">
+                        <div class="carousel-caption-title">Quality you can taste</div>
+                        <a href="{{ route('users.Market.index') }}" class="btn-cta">Explore</a>
+                    </div>
                 </div>
                 <div class="carousel-slide">
                     <img src="https://images.unsplash.com/photo-1599599810694-cd308a4f2d4b?w=1200&q=80&auto=format&fit=crop"
                         alt="Catch of the Day">
+                    <div class="carousel-caption">
+                        <div class="carousel-caption-title">Catch of the day</div>
+                        <a href="{{ route('users.Market.index') }}" class="btn-cta">See what's fresh</a>
+                    </div>
                 </div>
             @endforelse
         </div>
